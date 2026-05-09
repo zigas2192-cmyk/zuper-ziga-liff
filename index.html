@@ -137,7 +137,8 @@ input,select,textarea,button{font-family:inherit}
 var LIFF_ID       = '2010023092-EqIxfEch';
 var N8N_URL       = 'https://primary-production-4fbc.up.railway.app/webhook/ziga-liff-submit'; // ← Dev อัพเดต path ใหม่
 var EVENT_REF     = ''; // ถูก set จาก URL param ?ref=ZGT-xxx
-var EVENT_GROUP_ID = ''; // ถูก set จาก URL param ?groupId=Cxxx (มาจาก Flow 1 Flex Card)
+var EVENT_TARGET  = ''; // ถูก set จาก URL param ?target=Cxxx | Uxxx | Rxxx (มาจาก Flow 1)
+var EVENT_SRC_TYPE = ''; // 'group' | 'room' | 'user' — เพื่อให้ n8n push กลับถูกที่
 
 // ══════════════════════════════════════
 //  PRODUCT SPECS (ไม่มีราคา — รอ confirm)
@@ -173,10 +174,11 @@ async function initApp() {
   try {
     await liff.init({ liffId: LIFF_ID });
 
-    // Get URL params (ref + groupId passed from Flex Card button in Flow 1)
+    // Get URL params (ref + target + srcType passed from Flex Card button in Flow 1)
     var params = new URLSearchParams(location.search);
     EVENT_REF      = params.get('ref') || genRef();
-    EVENT_GROUP_ID = params.get('groupId') || '';
+    EVENT_TARGET   = params.get('target') || '';
+    EVENT_SRC_TYPE = params.get('srcType') || '';
 
     if (!liff.isLoggedIn()) {
       liff.login({ redirectUri: location.href });
@@ -379,7 +381,9 @@ async function doSub() {
     event:     'liff_submit',
     ref:       EVENT_REF,
     timestamp: new Date().toISOString(),
-    groupId:   EVENT_GROUP_ID || (groupContext ? (groupContext.groupId||groupContext.roomId||'') : ''),
+    pushTarget: EVENT_TARGET,
+    srcType:    EVENT_SRC_TYPE,
+    groupId:    EVENT_TARGET, // backward-compat: เก็บไว้ให้ Sheet column "group_id" เดิม
     sales: {
       lineUserId:   userProfile ? userProfile.userId : '',
       displayName:  userProfile ? userProfile.displayName : '',
