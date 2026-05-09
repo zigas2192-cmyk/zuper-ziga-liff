@@ -1,0 +1,7 @@
+{
+  "name": "zuper-ziga-liff",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npx serve -s . -l $PORT"
+  }
+}

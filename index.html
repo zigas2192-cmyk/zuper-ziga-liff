@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>Zuper ZIGA — บันทึกความสนใจ</title>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sarabun','Noto Sans Thai',system-ui,sans-serif;background:#f3f4f6;min-height:100vh}
+input,select,textarea,button{font-family:inherit}
+.inp{width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px 12px;font-size:14px;outline:none;background:#fff}
+.inp:focus{border-color:#065F46}
+.lbl{font-size:12px;font-weight:600;color:#555;margin-bottom:4px;display:block;margin-top:10px}
+.card{background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.ropt{flex:1;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 4px;text-align:center;cursor:pointer;font-size:12px;color:#555;background:#fff;user-select:none;transition:all .15s}
+.ropt.on{border-color:#065F46;background:#f0fdf4;color:#065F46;font-weight:700}
+.slot-box{background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px;margin-bottom:8px}
+.slot-box.filled{border-color:#D1FAE5;background:#f0fdf4}
+#loadingScreen,#errorScreen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#065F46;color:#fff;gap:12px;z-index:100}
+#errorScreen{background:#7f1d1d}
+.spin{width:36px;height:36px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.pop{animation:pop .2s ease forwards}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loadingScreen">
+  <div style="width:56px;height:56px;border-radius:14px;background:#D1FAE5;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#065F46">Z</div>
+  <div style="font-weight:700;font-size:16px">Zuper ZIGA Bot</div>
+  <div class="spin"></div>
+  <div style="font-size:12px;opacity:.7">กำลังโหลด...</div>
+</div>
+
+<!-- Error -->
+<div id="errorScreen" style="display:none">
+  <div style="font-size:32px">⚠️</div>
+  <div style="font-weight:700;font-size:16px">เกิดข้อผิดพลาด</div>
+  <div id="errorMsg" style="font-size:13px;opacity:.8;text-align:center;padding:0 24px"></div>
+  <button onclick="location.reload()" style="background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.4);color:#fff;border-radius:20px;padding:8px 20px;font-size:13px;cursor:pointer;margin-top:8px">ลองใหม่</button>
+</div>
+
+<!-- Main Form -->
+<div id="mainForm" style="display:none">
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#065F46,#047857);padding:14px 16px">
+    <div style="color:#fff;font-weight:800;font-size:15px">📋 บันทึกความสนใจ / การขาย</div>
+    <div style="color:#a7f3d0;font-size:11px;margin-top:2px" id="refLabel">Zuper ZIGA Bot · วันกุ้ง 2026</div>
+    <div style="color:#d1fae5;font-size:11px;margin-top:1px" id="salesLabel"></div>
+  </div>
+
+  <div style="padding:12px;max-width:480px;margin:0 auto">
+
+    <!-- Product badge -->
+    <div class="card" style="background:linear-gradient(135deg,#f0fdf4,#ecfdf5)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:40px;height:40px;border-radius:10px;background:#065F46;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🦐</div>
+        <div>
+          <div style="font-weight:800;font-size:14px;color:#065F46">ZUPER ZIGA 1"</div>
+          <div style="font-size:11px;color:#6b7280">OD 33.7 มม. · มอก. 107-2566 · High Tensile 400MPa · RoHS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer info -->
+    <div class="card">
+      <div style="font-weight:700;font-size:13px;color:#065F46;margin-bottom:10px">👤 ข้อมูลลูกค้า</div>
+
+      <label class="lbl" style="margin-top:0">ชื่อ-นามสกุล *</label>
+      <input class="inp" id="f_cust" placeholder="เช่น วิชัย ใจดี" oninput="chk()"/>
+
+      <label class="lbl">เบอร์โทร *</label>
+      <input class="inp" id="f_phone" placeholder="08x-xxx-xxxx" type="tel" oninput="chk()"/>
+
+      <label class="lbl">อีเมล (รับใบเสร็จ)</label>
+      <input class="inp" id="f_email" placeholder="email@example.com" type="email"/>
+
+      <label class="lbl">ที่อยู่</label>
+      <textarea class="inp" id="f_addr" rows="2" placeholder="บ้านเลขที่ / หมู่บ้าน / ตำบล / อำเภอ / จังหวัด" style="resize:none"></textarea>
+
+      <label class="lbl">ประเภทลูกค้า *</label>
+      <div style="display:flex;gap:7px;margin-top:5px">
+        <div class="ropt" id="ct_farm" onclick="selType('farm')">🦐 ผู้เลี้ยง</div>
+        <div class="ropt" id="ct_shop" onclick="selType('shop')">🏪 ร้านอุปกรณ์</div>
+        <div class="ropt" id="ct_other" onclick="selType('other')">📝 อื่นๆ</div>
+      </div>
+      <input type="hidden" id="f_ctype"/>
+      <div id="ctOtherWrap" style="display:none;margin-top:8px">
+        <input class="inp" id="f_ctype_other" placeholder="ระบุประเภทลูกค้า..."/>
+      </div>
+    </div>
+
+    <!-- Product slots -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-weight:700;font-size:13px;color:#065F46">📦 สินค้าที่สนใจ</div>
+        <span style="font-size:11px;color:#9ca3af" id="slotCountLbl">1 / 3 รุ่น</span>
+      </div>
+      <div id="slotsWrap"></div>
+      <button id="addSlotBtn" onclick="addSlot()" style="width:100%;background:#f0fdf4;border:1.5px dashed #065F46;border-radius:9px;padding:10px 0;color:#065F46;font-weight:700;font-size:13px;cursor:pointer;margin-top:2px">+ เพิ่มรุ่น</button>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #f0f0f0">
+        <label class="lbl" style="margin-top:0;color:#374151">📝 อื่นๆ / ความต้องการนอกรายการ</label>
+        <textarea class="inp" id="f_other" rows="2" placeholder="เช่น สอบถามราคาพิเศษ, ขนาดอื่นๆ, สั่งจำนวนมาก ฯลฯ" style="resize:none" oninput="chk()"></textarea>
+      </div>
+    </div>
+
+    <!-- Slip -->
+    <div class="card">
+      <div style="font-weight:700;font-size:13px;color:#065F46;margin-bottom:9px">💳 สลิปการโอน</div>
+      <button id="slipBtn" onclick="togSlip()" style="width:100%;background:#f3f4f6;border:1.5px solid #e5e7eb;border-radius:9px;padding:11px 0;color:#555;font-weight:600;font-size:13px;cursor:pointer">📷 แนบสลิป / ถ่ายหน้าจอมือถือลูกค้า</button>
+      <div style="font-size:11px;color:#9ca3af;margin-top:5px;text-align:center">ถ้ายังไม่โอน ข้ามได้เลย — สามารถส่งรูปสลิปใน LINE group ได้</div>
+    </div>
+
+    <!-- Submit -->
+    <button id="subBtn" onclick="doSub()" style="width:100%;background:#9ca3af;color:#fff;border:none;border-radius:12px;padding:15px 0;font-weight:800;font-size:15px;cursor:pointer;margin-bottom:6px">✅ บันทึก</button>
+    <div id="subHint" style="text-align:center;font-size:11px;color:#9ca3af;margin-bottom:20px">กรอกชื่อ โทร และเลือกประเภทลูกค้าก่อน</div>
+  </div>
+</div>
+
+<!-- Success -->
+<div id="successScreen" style="display:none;min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;background:#f0fdf4;padding:24px;text-align:center">
+  <div style="width:64px;height:64px;border-radius:50%;background:#065F46;display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;margin-bottom:16px">✓</div>
+  <div style="font-weight:800;font-size:20px;color:#065F46;margin-bottom:8px">บันทึกเรียบร้อย!</div>
+  <div id="sucRef" style="font-size:12px;color:#9ca3af;margin-bottom:12px"></div>
+  <div id="sucDetail" style="font-size:13px;color:#555;line-height:1.8;background:#fff;border-radius:12px;padding:14px 16px;width:100%;max-width:380px;text-align:left"></div>
+  <div style="font-size:11px;color:#888;margin-top:10px">Bot กำลังส่งสรุปกลับ LINE group...</div>
+  <button onclick="closeLIFF()" style="margin-top:20px;background:#065F46;color:#fff;border:none;border-radius:24px;padding:11px 28px;font-weight:700;font-size:14px;cursor:pointer">ปิดหน้าต่าง</button>
+</div>
+
+<script>
+// ══════════════════════════════════════
+//  CONFIG — Dev ต้องกรอกก่อน deploy
+// ══════════════════════════════════════
+var LIFF_ID   = '2010023092-EqIxfEch';
+var N8N_URL   = 'https://primary-production-4fbc.up.railway.app/webhook/ziga-liff-submit'; // ← Dev อัพเดต path ใหม่
+var EVENT_REF = ''; // ถูก set จาก URL param ?ref=ZGT-xxx
+
+// ══════════════════════════════════════
+//  PRODUCT SPECS (ไม่มีราคา — รอ confirm)
+// ══════════════════════════════════════
+var SPECS = {
+  '200': {label:'2.00 มม.', actual:'1.90 มม.', wgt:8.70},
+  '250': {label:'2.50 มม.', actual:'2.30 มม.', wgt:10.75},
+  '280': {label:'2.80 มม.', actual:'2.50 มม.', wgt:11.80},
+  '300': {label:'3.00 มม.', actual:'2.80 มม.', wgt:12.50},
+  '320': {label:'3.20 มม.', actual:'3.20 มม.', wgt:14.30},
+};
+var THK_OPTS = [
+  {v:'200', label:'2.00 มม. (วัดจริง 1.90) — 8.70 กก./เส้น'},
+  {v:'250', label:'2.50 มม. (วัดจริง 2.30) — 10.75 กก./เส้น'},
+  {v:'280', label:'2.80 มม. (วัดจริง 2.50) — 11.80 กก./เส้น'},
+  {v:'300', label:'3.00 มม. (วัดจริง 2.80) — 12.50 กก./เส้น'},
+  {v:'320', label:'3.20 มม. (วัดจริง 3.20) — 14.30 กก./เส้น'},
+];
+
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
+var userProfile  = null;
+var groupContext = null;
+var slipDone     = false;
+var slotData     = [{thk:'',end:'',qty:1},{thk:'',end:'',qty:1},{thk:'',end:'',qty:1}];
+var activeSlots  = 1;
+
+// ══════════════════════════════════════
+//  LIFF INIT
+// ══════════════════════════════════════
+async function initApp() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+
+    // Get URL params (ref passed from Flex Card button)
+    var params = new URLSearchParams(location.search);
+    EVENT_REF = params.get('ref') || genRef();
+
+    if (!liff.isLoggedIn()) {
+      liff.login({ redirectUri: location.href });
+      return;
+    }
+
+    userProfile  = await liff.getProfile();
+    groupContext = liff.getContext();
+
+    // Pre-fill sales name in header
+    var sl = document.getElementById('salesLabel');
+    if (sl && userProfile) sl.textContent = 'Sales: ' + userProfile.displayName;
+
+    var rl = document.getElementById('refLabel');
+    if (rl) rl.textContent = 'Zuper ZIGA Bot · ' + EVENT_REF;
+
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('mainForm').style.display = 'block';
+    renderSlots();
+    chk();
+
+  } catch(e) {
+    showError('LINE LIFF ไม่สามารถเริ่มทำงานได้<br>' + e.message);
+  }
+}
+
+function showError(msg) {
+  document.getElementById('loadingScreen').style.display = 'none';
+  var es = document.getElementById('errorScreen');
+  es.style.display = 'flex';
+  document.getElementById('errorMsg').innerHTML = msg;
+}
+
+function genRef() {
+  var d = new Date();
+  var dt = d.getFullYear().toString()
+    + String(d.getMonth()+1).padStart(2,'0')
+    + String(d.getDate()).padStart(2,'0');
+  var t = String(d.getHours()).padStart(2,'0') + String(d.getMinutes()).padStart(2,'0') + String(d.getSeconds()).padStart(2,'0');
+  return 'ZGT-' + dt + '-' + t;
+}
+
+function escH(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ══════════════════════════════════════
+//  CUSTOMER TYPE
+// ══════════════════════════════════════
+function selType(v) {
+  document.getElementById('f_ctype').value = v;
+  ['farm','shop','other'].forEach(function(k) {
+    document.getElementById('ct_'+k).className = 'ropt'+(v===k?' on':'');
+  });
+  document.getElementById('ctOtherWrap').style.display = v==='other' ? 'block' : 'none';
+  if (v!=='other') document.getElementById('f_ctype_other').value = '';
+  chk();
+}
+
+// ══════════════════════════════════════
+//  PRODUCT SLOTS
+// ══════════════════════════════════════
+function renderSlots() {
+  var w = document.getElementById('slotsWrap');
+  if (!w) return;
+  w.innerHTML = '';
+  for (var i = 0; i < activeSlots; i++) {
+    var s = slotData[i], n = i+1, hasData = s.thk && s.end;
+    var d = document.createElement('div');
+    d.className = 'slot-box' + (hasData?' filled':'');
+    d.id = 'slot_'+i;
+
+    var hdr = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+      + '<span style="font-size:12px;font-weight:700;color:#065F46">รุ่น '+n+(n>1?' <span style="color:#9ca3af;font-weight:400">(optional)</span>':'  *')+'</span>'
+      + (n>1?'<button onclick="removeSlot('+i+')" style="background:#fff1f2;border:none;color:#ef4444;font-size:11px;cursor:pointer;padding:3px 8px;border-radius:6px">✕ ลบ</button>':'')
+      + '</div>';
+
+    var sel = '<select class="inp" id="thk_'+i+'" style="appearance:none;font-size:13px" onchange="onThkChange('+i+',this.value)">'
+      + '<option value="">-- เลือกความหนา --</option>'
+      + THK_OPTS.map(function(o){return '<option value="'+o.v+'"'+(s.thk===o.v?' selected':'')+'>'+o.label+'</option>';}).join('')
+      + '</select>';
+
+    var radio = '<div style="display:flex;gap:7px;margin-top:8px">'
+      + '<div class="ropt'+(s.end==='TH'?' on':'')+'" id="e_'+i+'_TH" onclick="onEndChange('+i+',\'TH\')">🔩 ปลายเกลียว</div>'
+      + '<div class="ropt'+(s.end==='PL'?' on':'')+'" id="e_'+i+'_PL" onclick="onEndChange('+i+',\'PL\')">⬜ ปลายเรียบ</div>'
+      + '</div>';
+
+    var wgtStr = s.thk ? (SPECS[s.thk].wgt*s.qty).toFixed(2)+' กก.' : '— กก.';
+    var qty = '<div style="display:flex;align-items:center;gap:8px;margin-top:8px">'
+      + '<span style="font-size:12px;color:#555;font-weight:600;white-space:nowrap">จำนวน (เส้น)</span>'
+      + '<input class="inp" id="qty_'+i+'" type="number" min="1" value="'+s.qty+'" style="width:75px;font-size:13px;padding:7px 9px" oninput="onQtyChange('+i+',this.value)"/>'
+      + '<span style="font-size:11px;color:#9ca3af" id="wgt_'+i+'">'+wgtStr+'</span>'
+      + '</div>';
+
+    var sku = hasData
+      ? '<div style="margin-top:8px;background:#065F46;border-radius:7px;padding:5px 10px;display:inline-flex;align-items:center;gap:7px">'
+        + '<span style="font-size:11px;color:#fff;font-weight:700">ZUPER1-'+s.thk+'-'+s.end+'</span>'
+        + '<span style="font-size:10px;color:#a7f3d0">× '+s.qty+' เส้น | '+(SPECS[s.thk].wgt*s.qty).toFixed(2)+' กก.</span>'
+        + '</div>'
+      : '';
+
+    d.innerHTML = hdr + sel + radio + qty + sku;
+    w.appendChild(d);
+  }
+  var lbl = document.getElementById('slotCountLbl');
+  if (lbl) lbl.textContent = activeSlots+' / 3 รุ่น';
+  var btn = document.getElementById('addSlotBtn');
+  if (btn) btn.style.display = activeSlots>=3 ? 'none' : 'block';
+}
+
+function addSlot() { if (activeSlots<3) { activeSlots++; renderSlots(); chk(); } }
+
+function removeSlot(i) {
+  slotData[i] = {thk:'',end:'',qty:1};
+  for (var j=i; j<activeSlots-1; j++) slotData[j] = slotData[j+1];
+  slotData[activeSlots-1] = {thk:'',end:'',qty:1};
+  activeSlots--;
+  renderSlots(); chk();
+}
+
+function onThkChange(i,v) { slotData[i].thk=v; renderSlots(); chk(); }
+function onEndChange(i,v) { slotData[i].end=v; renderSlots(); chk(); }
+function onQtyChange(i,v) {
+  slotData[i].qty = parseInt(v)||1;
+  var w = document.getElementById('wgt_'+i);
+  if (w && slotData[i].thk) w.textContent = (SPECS[slotData[i].thk].wgt*slotData[i].qty).toFixed(2)+' กก.';
+}
+
+// ══════════════════════════════════════
+//  SLIP
+// ══════════════════════════════════════
+function togSlip() {
+  slipDone = !slipDone;
+  var b = document.getElementById('slipBtn');
+  b.textContent = slipDone ? '✓ แนบสลิปแล้ว' : '📷 แนบสลิป / ถ่ายหน้าจอมือถือลูกค้า';
+  b.style.cssText = 'width:100%;border-radius:9px;padding:11px 0;font-weight:600;font-size:13px;cursor:pointer;'
+    + (slipDone ? 'background:#d1fae5;border:1.5px solid #065F46;color:#065F46' : 'background:#f3f4f6;border:1.5px solid #e5e7eb;color:#555');
+}
+
+// ══════════════════════════════════════
+//  VALIDATION
+// ══════════════════════════════════════
+function chk() {
+  var n  = (document.getElementById('f_cust')||{}).value||'';
+  var p  = (document.getElementById('f_phone')||{}).value||'';
+  var ct = (document.getElementById('f_ctype')||{}).value||'';
+  var s1 = slotData[0];
+  var s1ok = s1.thk && s1.end;
+  var other = (document.getElementById('f_other')||{}).value||'';
+  var ok = n.trim() && p.trim() && ct && (s1ok || other.trim());
+  var btn = document.getElementById('subBtn'), ht = document.getElementById('subHint');
+  if (!btn) return;
+  btn.style.background = ok ? '#065F46' : '#9ca3af';
+  btn.style.boxShadow  = ok ? '0 4px 16px rgba(6,95,70,.35)' : 'none';
+  if (ht) ht.textContent = ok ? '' :
+    (!n.trim() ? 'กรอกชื่อลูกค้าก่อน' :
+    !p.trim()  ? 'กรอกเบอร์โทรก่อน'   :
+    !ct        ? 'เลือกประเภทลูกค้าก่อน' :
+    'เลือกสินค้าอย่างน้อย 1 รุ่น หรือกรอก "อื่นๆ"');
+}
+
+// ══════════════════════════════════════
+//  SUBMIT
+// ══════════════════════════════════════
+async function doSub() {
+  var n  = (document.getElementById('f_cust')||{}).value||'';
+  var p  = (document.getElementById('f_phone')||{}).value||'';
+  var ct = (document.getElementById('f_ctype')||{}).value||'';
+  var other = (document.getElementById('f_other')||{}).value||'';
+  if (!n.trim() || !p.trim() || !ct) return;
+  if (!slotData[0].thk && !slotData[0].end && !other.trim()) return;
+
+  var btn = document.getElementById('subBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลังบันทึก...';
+
+  var ctOther = (document.getElementById('f_ctype_other')||{}).value||'';
+  var ctLabel = {farm:'ผู้เลี้ยง', shop:'ร้านขายอุปกรณ์', other: ctOther||'อื่นๆ'}[ct]||ct;
+  var addr = (document.getElementById('f_addr')||{}).value||'';
+  var email = (document.getElementById('f_email')||{}).value||'';
+
+  // Build products array
+  var products = [];
+  for (var i=0; i<activeSlots; i++) {
+    var s = slotData[i];
+    if (!s.thk || !s.end) continue;
+    var spec = SPECS[s.thk];
+    products.push({
+      sku:      'ZUPER1-'+s.thk+'-'+s.end,
+      thk:      s.thk,
+      end:      s.end,
+      endLabel: s.end==='TH' ? 'ปลายเกลียว' : 'ปลายเรียบ',
+      qty:      s.qty,
+      wgtPerPc: spec.wgt,
+      wgtTotal: parseFloat((spec.wgt*s.qty).toFixed(2)),
+    });
+  }
+
+  var payload = {
+    event:     'liff_submit',
+    ref:       EVENT_REF,
+    timestamp: new Date().toISOString(),
+    groupId:   groupContext ? (groupContext.groupId||groupContext.roomId||'') : '',
+    sales: {
+      lineUserId:   userProfile ? userProfile.userId : '',
+      displayName:  userProfile ? userProfile.displayName : '',
+    },
+    customer: {
+      name:       n.trim(),
+      phone:      p.trim(),
+      email:      email,
+      address:    addr,
+      type:       ct,
+      typeLabel:  ctLabel,
+      typeOther:  ctOther,
+    },
+    products:  products,
+    other:     other.trim(),
+    hasSlip:   slipDone,
+  };
+
+  try {
+    var res = await fetch(N8N_URL, {
+      method:  'POST',
+      headers: {'Content-Type': 'application/json'},
+      body:    JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('HTTP '+res.status);
+
+    showSuccess(payload);
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '✅ บันทึก';
+    alert('เกิดข้อผิดพลาด: ' + e.message + '\nกรุณาลองใหม่');
+  }
+}
+
+function showSuccess(p) {
+  document.getElementById('mainForm').style.display = 'none';
+  var ss = document.getElementById('successScreen');
+  ss.style.display = 'flex';
+  ss.style.flexDirection = 'column';
+  document.getElementById('sucRef').textContent = p.ref;
+  var lines = 'ลูกค้า: <b>'+escH(p.customer.name)+'</b> ('+escH(p.customer.typeLabel)+')<br>'
+    + 'โทร: <b>'+escH(p.customer.phone)+'</b>'
+    + (p.customer.address ? '<br>ที่อยู่: '+escH(p.customer.address) : '');
+  if (p.products.length) {
+    lines += '<br><br><b>สินค้า:</b><br>';
+    p.products.forEach(function(pr) {
+      lines += '• <b style="color:#065F46">'+pr.sku+'</b> ×'+pr.qty+' เส้น ('+pr.endLabel+') '+pr.wgtTotal+' กก.<br>';
+    });
+  }
+  if (p.other) lines += '<br>อื่นๆ: <b>'+escH(p.other)+'</b>';
+  lines += '<br>' + (p.hasSlip ? '💰 แนบสลิปแล้ว' : '📝 ยังไม่ได้โอน');
+  document.getElementById('sucDetail').innerHTML = lines;
+}
+
+function closeLIFF() {
+  if (liff.isInClient()) {
+    liff.closeWindow();
+  } else {
+    document.getElementById('successScreen').style.display = 'none';
+    document.getElementById('mainForm').style.display = 'block';
+    // reset
+    slotData = [{thk:'',end:'',qty:1},{thk:'',end:'',qty:1},{thk:'',end:'',qty:1}];
+    activeSlots = 1; slipDone = false;
+    ['f_cust','f_phone','f_email','f_addr','f_other','f_ctype_other'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+    document.getElementById('f_ctype').value='';
+    ['farm','shop','other'].forEach(function(k){var e=document.getElementById('ct_'+k);if(e)e.className='ropt';});
+    document.getElementById('ctOtherWrap').style.display='none';
+    renderSlots(); chk();
+  }
+}
+
+document.addEventListener('input', function(e){
+  if (['f_cust','f_phone','f_other','f_ctype_other'].indexOf(e.target.id)>=0) chk();
+});
+
+// Start
+initApp();
+</script>
+</body>
+</html>
