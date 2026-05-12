@@ -640,7 +640,7 @@
       html += `<optgroup label="Zuper ZIGA ${model}${isNew ? ' 🆕' : ''}">`;
       grouped[model].forEach(p => {
         const screenInfo = p.screen ? ` (สกรีน ${p.screen})` : '';
-        const label = `${p.model} หนา ${p.thk}${screenInfo} ${p.endLabel} — ${p.wgtPerPc} กก./เส้น`;
+        const label = `${p.model} หนา ${p.thk}${screenInfo} ${p.endLabel} - ${p.wgtPerPc} กก./เส้น`;
         html += `<option value="${p.sku}">${label}</option>`;
       });
       html += '</optgroup>';
