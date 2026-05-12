@@ -571,17 +571,17 @@
   // 1" — 10 SKUs (screen value used in SKU code)
   // 1-1/4" — 4 SKUs (actual value used in SKU code per user spec)
   const PRODUCTS = [
-    // ZIGA 1" — สกรีน 2.0
-    { sku: 'ZUPER1-200-TH', model: '1"',     thk: '2.0', actual: '1.9', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 8.70  },
-    { sku: 'ZUPER1-200-PL', model: '1"',     thk: '2.0', actual: '1.9', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 8.70  },
-    { sku: 'ZUPER1-250-TH', model: '1"',     thk: '2.5', actual: '2.3', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 10.75 },
-    { sku: 'ZUPER1-250-PL', model: '1"',     thk: '2.5', actual: '2.3', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 10.75 },
-    { sku: 'ZUPER1-280-TH', model: '1"',     thk: '2.8', actual: '2.5', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 11.80 },
-    { sku: 'ZUPER1-280-PL', model: '1"',     thk: '2.8', actual: '2.5', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 11.80 },
-    { sku: 'ZUPER1-300-TH', model: '1"',     thk: '3.0', actual: '2.8', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 12.50 },
-    { sku: 'ZUPER1-300-PL', model: '1"',     thk: '3.0', actual: '2.8', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 12.50 },
-    { sku: 'ZUPER1-320-TH', model: '1"',     thk: '3.2', actual: '3.2', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 14.30 },
-    { sku: 'ZUPER1-320-PL', model: '1"',     thk: '3.2', actual: '3.2', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 14.30 },
+    // ZIGA 1" — 10 SKUs (display: thk=actual, screen in parens)
+    { sku: 'ZUPER1-200-TH', model: '1"',     thk: '1.9',     actual: '1.9', screen: '2.0', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 8.70  },
+    { sku: 'ZUPER1-200-PL', model: '1"',     thk: '1.9',     actual: '1.9', screen: '2.0', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 8.70  },
+    { sku: 'ZUPER1-250-TH', model: '1"',     thk: '2.3',     actual: '2.3', screen: '2.5', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 10.75 },
+    { sku: 'ZUPER1-250-PL', model: '1"',     thk: '2.3',     actual: '2.3', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 10.75 },
+    { sku: 'ZUPER1-280-TH', model: '1"',     thk: '2.5 เต็ม', actual: '2.5', screen: '2.5', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 11.80 },
+    { sku: 'ZUPER1-280-PL', model: '1"',     thk: '2.5 เต็ม', actual: '2.5', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 11.80 },
+    { sku: 'ZUPER1-300-TH', model: '1"',     thk: '2.8',     actual: '2.8', screen: '3.0', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 12.50 },
+    { sku: 'ZUPER1-300-PL', model: '1"',     thk: '2.8',     actual: '2.8', screen: '3.0', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 12.50 },
+    { sku: 'ZUPER1-320-TH', model: '1"',     thk: '3.2',     actual: '3.2', screen: '3.2', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 14.30 },
+    { sku: 'ZUPER1-320-PL', model: '1"',     thk: '3.2',     actual: '3.2', screen: '3.2', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 14.30 },
     // ZIGA 1-1/4" — NEW (สกรีน 2.5 / actual 2.3)
     { sku: 'ZUPER125-230-TH', model: '1-1/4"', thk: '2.3', actual: '2.3', screen: '2.5', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 13.5 },
     { sku: 'ZUPER125-230-PL', model: '1-1/4"', thk: '2.3', actual: '2.3', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 13.5 },
