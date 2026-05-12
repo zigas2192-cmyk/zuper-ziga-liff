@@ -851,6 +851,16 @@
       `${i + 1}) Zuper ZIGA ${p.model} หนา ${p.thk} ${p.endLabel} — ${p.qty} เส้น (${p.wgtTotal} กก.)`
     ).join('\n');
 
+// Giveaways (both modes, optional)
+    const giveawayShirtRaw = parseInt(document.getElementById('giveawayShirt').value);
+    const giveawayChairRaw = parseInt(document.getElementById('giveawayChair').value);
+    const giveawayShirt = isNaN(giveawayShirtRaw) || giveawayShirtRaw < 0 ? 0 : giveawayShirtRaw;
+    const giveawayChair = isNaN(giveawayChairRaw) || giveawayChairRaw < 0 ? 0 : giveawayChairRaw;
+    const giveaways = (giveawayShirt > 0 || giveawayChair > 0) ? {
+      shirt: giveawayShirt,
+      chair: giveawayChair
+    } : null;
+    
     return {
       event: 'liff_submit',
       ref: ref,
@@ -879,7 +889,8 @@
       products: products,
       productsSummary: productsSummary,
       payment: payment,
-      other: document.getElementById('other').value.trim()
+      other: document.getElementById('other').value.trim(),
+        giveaways: giveaways
     };
   }
 
