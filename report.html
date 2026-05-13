@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sales Report — Zuper ZIGA Bot</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+:root {
+  --ziga-primary: #065F46;
+  --ziga-secondary: #059669;
+  --ziga-accent: #34D399;
+  --ziga-light: #ECFDF5;
+  --ziga-danger: #DC2626;
+  --ziga-warn: #D97706;
+  --ziga-bg: #F0FDF4;
+  --ziga-card: #FFFFFF;
+  --ziga-text: #1E293B;
+  --ziga-muted: #64748B;
+  --ziga-border: #D1D5DB;
+  --ziga-radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans Thai', sans-serif;
+  background: var(--ziga-bg);
+  color: var(--ziga-text);
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+.header {
+  background: linear-gradient(135deg, var(--ziga-primary), var(--ziga-secondary));
+  color: #fff;
+  padding: 20px 16px 16px;
+  text-align: center;
+}
+.header h1 { font-size: 18px; font-weight: 600; margin-bottom: 2px; }
+.header p { font-size: 12px; opacity: 0.85; }
+.sales-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 12px;
+  margin-top: 8px;
+}
+.form-wrap { padding: 12px 16px; }
+.section-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ziga-primary);
+  margin: 16px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.section-label .num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--ziga-primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.req { color: var(--ziga-danger); margin-left: 2px; }
+.card {
+  background: var(--ziga-card);
+  border-radius: var(--ziga-radius);
+  padding: 14px;
+  border: 1px solid #E5E7EB;
+  margin-bottom: 4px;
+}
+.f-input, .f-textarea, .f-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--ziga-border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  color: var(--ziga-text);
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+.f-input:focus, .f-textarea:focus, .f-select:focus {
+  outline: none;
+  border-color: var(--ziga-secondary);
+  box-shadow: 0 0 0 3px rgba(5,150,105,0.12);
+}
+.f-textarea { min-height: 80px; resize: vertical; line-height: 1.6; }
+.f-input.error, .f-textarea.error { border-color: var(--ziga-danger); }
+.error-msg { font-size: 11px; color: var(--ziga-danger); margin-top: 4px; display: none; }
+.error-msg.show { display: block; }
+
+/* Opportunity pills */
+.opp-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.opp-pill {
+  flex: 1;
+  padding: 10px 4px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px solid var(--ziga-border);
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.opp-pill.sel-high { background: var(--ziga-light); border-color: var(--ziga-primary); color: var(--ziga-primary); }
+.opp-pill.sel-mid { background: #FFFBEB; border-color: var(--ziga-warn); color: var(--ziga-warn); }
+.opp-pill.sel-low { background: #FEF2F2; border-color: var(--ziga-danger); color: var(--ziga-danger); }
+
+/* Product chips */
+.chip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  padding: 8px 16px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px solid var(--ziga-border);
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.chip.sel { background: var(--ziga-primary); color: #fff; border-color: var(--ziga-primary); }
+.other-input {
+  display: none;
+  margin-top: 8px;
+}
+.other-input.show { display: block; }
+
+/* Submit button */
+.submit-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #E5E7EB;
+  z-index: 100;
+}
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--ziga-primary);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.submit-btn:active { transform: scale(0.98); background: #064E3B; }
+.submit-btn:disabled { background: #9CA3AF; cursor: not-allowed; }
+
+/* Success screen */
+.success-screen {
+  display: none;
+  text-align: center;
+  padding: 60px 24px;
+}
+.success-screen.show { display: block; }
+.success-icon {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: var(--ziga-light);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  margin-bottom: 16px;
+}
+.success-screen h2 { font-size: 20px; font-weight: 600; color: var(--ziga-primary); margin-bottom: 4px; }
+.success-screen p { font-size: 14px; color: var(--ziga-muted); }
+.success-ref {
+  display: inline-block;
+  background: var(--ziga-light);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--ziga-primary);
+  font-weight: 500;
+  margin-top: 12px;
+}
+.close-btn {
+  margin-top: 24px;
+  padding: 12px 32px;
+  border-radius: 8px;
+  background: var(--ziga-primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Loading overlay */
+.loading {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.9);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+}
+.loading.show { display: flex; }
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--ziga-light);
+  border-top-color: var(--ziga-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <p style="font-size:14px;color:var(--ziga-muted)">กำลังบันทึก...</p>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <h1>📋 Sales Daily Report</h1>
+  <p>Zuper ZIGA Bot — รายงานการขายประจำวัน</p>
+  <div class="sales-badge" id="salesBadge">👤 กำลังโหลด...</div>
+</div>
+
+<!-- Form -->
+<div class="form-wrap" id="formWrap">
+
+  <!-- 1. Customer count -->
+  <div class="section-label"><span class="num">1</span> จำนวนลูกค้าที่เข้าพบ <span class="req">*</span></div>
+  <div class="card">
+    <input class="f-input" type="number" id="custCount" placeholder="เช่น 5" min="0" max="999" inputmode="numeric">
+    <div class="error-msg" id="errCount">กรุณาระบุจำนวนลูกค้า</div>
+  </div>
+
+  <!-- 2. Customer list -->
+  <div class="section-label"><span class="num">2</span> รายชื่อลูกค้าที่เข้าพบ <span class="req">*</span></div>
+  <div class="card">
+    <textarea class="f-textarea" id="custList" placeholder="พิมพ์ชื่อลูกค้า คนละ 1 บรรทัด&#10;เช่น:&#10;บจก. สุราษฎร์ฟาร์ม&#10;คุณสมชาย (ผู้เลี้ยงกุ้ง)"></textarea>
+    <div class="error-msg" id="errList">กรุณาระบุรายชื่อลูกค้า</div>
+  </div>
+
+  <!-- 3. Opportunity -->
+  <div class="section-label"><span class="num">3</span> โอกาสการขาย</div>
+  <div class="card">
+    <div class="opp-row">
+      <div class="opp-pill" data-val="สูง" data-cls="sel-high" onclick="selOpp(this)">🟢 สูง</div>
+      <div class="opp-pill" data-val="กลาง" data-cls="sel-mid" onclick="selOpp(this)">🟡 กลาง</div>
+      <div class="opp-pill" data-val="ต่ำ" data-cls="sel-low" onclick="selOpp(this)">🔴 ต่ำ</div>
+    </div>
+    <textarea class="f-textarea" id="oppDetail" placeholder="รายละเอียดเพิ่มเติม เช่น ลูกค้า 2 ราย พร้อมสั่งซื้อ..." style="min-height:56px"></textarea>
+  </div>
+
+  <!-- 4. Products interest -->
+  <div class="section-label"><span class="num">4</span> สินค้าที่สนใจ</div>
+  <div class="card">
+    <div class="chip-grid">
+      <div class="chip" data-val="DAIWA" onclick="togChip(this)">DAIWA</div>
+      <div class="chip" data-val="ZIGA" onclick="togChip(this)">ZIGA</div>
+      <div class="chip" data-val="Zuper ZIGA" onclick="togChip(this)">Zuper ZIGA</div>
+      <div class="chip" data-val="HZO" onclick="togChip(this)">HZO</div>
+      <div class="chip" data-val="อื่นๆ" onclick="togOther(this)">อื่นๆ</div>
+    </div>
+    <div class="other-input" id="otherWrap">
+      <input class="f-input" id="otherProduct" placeholder="ระบุสินค้าอื่นๆ">
+    </div>
+  </div>
+
+  <!-- 5. Issues -->
+  <div class="section-label"><span class="num">5</span> ปัญหาที่พบและการแก้ไข</div>
+  <div class="card">
+    <textarea class="f-textarea" id="issues" placeholder="เช่น ลูกค้าเปรียบเทียบราคา — เน้นจุดแข็ง durability" style="min-height:64px"></textarea>
+  </div>
+
+  <!-- 6. Deal progress -->
+  <div class="section-label"><span class="num">6</span> ความคืบหน้าของสัญญาที่เจรจา</div>
+  <div class="card">
+    <textarea class="f-textarea" id="dealProgress" placeholder="เช่น สุราษฎร์ฟาร์ม รอ PO คาดว่าได้ภายใน 3 วัน" style="min-height:64px"></textarea>
+  </div>
+
+</div>
+
+<!-- Submit bar -->
+<div class="submit-bar" id="submitBar">
+  <button class="submit-btn" id="submitBtn" onclick="doSubmit()">
+    <span>📤</span> บันทึก Sales Report
+  </button>
+</div>
+
+<!-- Success screen -->
+<div class="success-screen" id="successScreen">
+  <div class="success-icon">✅</div>
+  <h2>บันทึกเรียบร้อย!</h2>
+  <p>Report ถูกส่งถึง Group ผู้บริหารแล้ว</p>
+  <div class="success-ref" id="successRef"></div>
+  <br>
+  <button class="close-btn" onclick="closeLiff()">ปิด</button>
+</div>
+
+<script>
+// ============================================================
+// CONFIG — เปลี่ยน URL ตรงนี้เมื่อ deploy
+// ============================================================
+var LIFF_ID = '2010023092-EqIxfEch';
+var N8N_URL = 'https://primary-production-4fbc.up.railway.app/webhook/ziga-sales-report';
+
+// ============================================================
+// STATE
+// ============================================================
+var salesProfile = { lineUserId: '', displayName: 'Unknown' };
+var groupId = '';
+var selectedOpp = '';
+var selectedProducts = [];
+
+// ============================================================
+// LIFF INIT
+// ============================================================
+(function initLiff() {
+  liff.init({ liffId: LIFF_ID }).then(function() {
+    if (!liff.isLoggedIn()) {
+      liff.login();
+      return;
+    }
+    return liff.getProfile().then(function(profile) {
+      salesProfile.lineUserId = profile.userId;
+      salesProfile.displayName = profile.displayName;
+      document.getElementById('salesBadge').textContent = '👤 ' + profile.displayName;
+    });
+  }).then(function() {
+    var ctx = liff.getContext();
+    if (ctx && ctx.type === 'group') {
+      groupId = ctx.groupId || '';
+    }
+    // Also check URL params (for groupId passed from Flex Card)
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('groupId')) {
+      groupId = params.get('groupId');
+    }
+  }).catch(function(err) {
+    console.error('LIFF init error:', err);
+    document.getElementById('salesBadge').textContent = '⚠️ LIFF error';
+  });
+})();
+
+// ============================================================
+// UI INTERACTIONS
+// ============================================================
+function selOpp(el) {
+  document.querySelectorAll('.opp-pill').forEach(function(p) {
+    p.classList.remove('sel-high', 'sel-mid', 'sel-low');
+  });
+  el.classList.add(el.dataset.cls);
+  selectedOpp = el.dataset.val;
+}
+
+function togChip(el) {
+  el.classList.toggle('sel');
+  var val = el.dataset.val;
+  var idx = selectedProducts.indexOf(val);
+  if (idx >= 0) selectedProducts.splice(idx, 1);
+  else selectedProducts.push(val);
+}
+
+function togOther(el) {
+  el.classList.toggle('sel');
+  var wrap = document.getElementById('otherWrap');
+  var val = el.dataset.val;
+  var idx = selectedProducts.indexOf(val);
+  if (el.classList.contains('sel')) {
+    wrap.classList.add('show');
+    if (idx < 0) selectedProducts.push(val);
+    document.getElementById('otherProduct').focus();
+  } else {
+    wrap.classList.remove('show');
+    if (idx >= 0) selectedProducts.splice(idx, 1);
+  }
+}
+
+// ============================================================
+// GENERATE REF
+// ============================================================
+function genRef() {
+  var now = new Date();
+  var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+  return 'RPT-' +
+    now.getFullYear() +
+    pad(now.getMonth() + 1) +
+    pad(now.getDate()) + '-' +
+    pad(now.getHours()) +
+    pad(now.getMinutes()) +
+    pad(now.getSeconds());
+}
+
+// ============================================================
+// VALIDATE
+// ============================================================
+function validate() {
+  var ok = true;
+  var count = document.getElementById('custCount');
+  var list = document.getElementById('custList');
+
+  // Reset
+  count.classList.remove('error');
+  list.classList.remove('error');
+  document.getElementById('errCount').classList.remove('show');
+  document.getElementById('errList').classList.remove('show');
+
+  if (!count.value || parseInt(count.value) <= 0) {
+    count.classList.add('error');
+    document.getElementById('errCount').classList.add('show');
+    ok = false;
+  }
+  if (!list.value.trim()) {
+    list.classList.add('error');
+    document.getElementById('errList').classList.add('show');
+    ok = false;
+  }
+  return ok;
+}
+
+// ============================================================
+// SUBMIT
+// ============================================================
+function doSubmit() {
+  if (!validate()) return;
+
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  document.getElementById('loading').classList.add('show');
+
+  var ref = genRef();
+  var now = new Date().toISOString();
+
+  // Build products list (replace "อื่นๆ" with actual text if provided)
+  var prods = selectedProducts.slice();
+  var otherIdx = prods.indexOf('อื่นๆ');
+  var otherText = document.getElementById('otherProduct').value.trim();
+  if (otherIdx >= 0 && otherText) {
+    prods[otherIdx] = otherText;
+  } else if (otherIdx >= 0 && !otherText) {
+    prods.splice(otherIdx, 1);
+  }
+
+  var payload = {
+    event: 'sales_report',
+    ref: ref,
+    timestamp: now,
+    groupId: groupId,
+    sales: {
+      lineUserId: salesProfile.lineUserId,
+      displayName: salesProfile.displayName
+    },
+    report: {
+      customerCount: parseInt(document.getElementById('custCount').value) || 0,
+      customerList: document.getElementById('custList').value.trim(),
+      opportunity: selectedOpp,
+      opportunityDetail: document.getElementById('oppDetail').value.trim(),
+      productsInterest: prods.join(', '),
+      issues: document.getElementById('issues').value.trim(),
+      dealProgress: document.getElementById('dealProgress').value.trim()
+    }
+  };
+
+  fetch(N8N_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(res) {
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.text();
+  })
+  .then(function() {
+    document.getElementById('loading').classList.remove('show');
+    document.getElementById('formWrap').style.display = 'none';
+    document.getElementById('submitBar').style.display = 'none';
+    document.getElementById('successRef').textContent = ref;
+    document.getElementById('successScreen').classList.add('show');
+  })
+  .catch(function(err) {
+    console.error('Submit error:', err);
+    document.getElementById('loading').classList.remove('show');
+    btn.disabled = false;
+    alert('เกิดข้อผิดพลาด กรุณาลองอีกครั้ง\n\n' + err.message);
+  });
+}
+
+function closeLiff() {
+  if (liff.isInClient()) {
+    liff.closeWindow();
+  } else {
+    window.close();
+  }
+}
+</script>
+</body>
+</html>
