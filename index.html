@@ -519,16 +519,20 @@
       </div>
       <div class="payment-grid">
         <div class="field">
-          <label>ยอดรวมทั้งสิ้น (บาท)</label>
+          <label>ค่าสินค้าชำระในงาน (บาท)</label>
           <input type="number" id="totalAmount" placeholder="เช่น 15000" min="0" step="0.01" inputmode="decimal" />
         </div>
         <div class="field">
-          <label>มัดจำรับ (บาท)</label>
-          <input type="number" id="depositAmount" placeholder="เช่น 5000" min="0" step="0.01" inputmode="decimal" />
+          <label>ส่วนลด E-Voucher (บาท)</label>
+          <input type="number" id="voucherAmount" placeholder="เช่น 500" min="0" step="0.01" inputmode="decimal" />
         </div>
         <div class="field payment-full">
-          <label>ยอดคงเหลือ <span class="hint">(คำนวณอัตโนมัติ)</span></label>
-          <input type="text" id="remainingAmount" placeholder="—" readonly />
+          <label>ยอดสุทธิหลังหัก E-Voucher <span class="hint">(คำนวณอัตโนมัติ)</span></label>
+          <input type="text" id="netAmount" placeholder="—" readonly />
+        </div>
+        <div class="field payment-full">
+          <label>มัดจำรับ (บาท) <span class="hint">(แยกต่างหาก)</span></label>
+          <input type="number" id="depositAmount" placeholder="เช่น 5000" min="0" step="0.01" inputmode="decimal" />
         </div>
       </div>
     </div>
@@ -777,16 +781,19 @@
 
   // ============================================================
   // PAYMENT AUTO-CALC
+  // net = ค่าสินค้าชำระในงาน − ส่วนลด E-Voucher
+  // มัดจำเป็นอิสระ ไม่เกี่ยวกับการคำนวณยอดสุทธิ
   // ============================================================
   function recalcPayment() {
     const total = parseFloat(document.getElementById('totalAmount').value);
-    const deposit = parseFloat(document.getElementById('depositAmount').value);
-    const remaining = document.getElementById('remainingAmount');
-    if (!isNaN(total) && !isNaN(deposit)) {
-      const r = total - deposit;
-      remaining.value = formatMoney(r) + ' บาท';
+    const voucher = parseFloat(document.getElementById('voucherAmount').value);
+    const netEl = document.getElementById('netAmount');
+    if (!isNaN(total)) {
+      const v = isNaN(voucher) ? 0 : voucher;
+      const net = total - v;
+      netEl.value = formatMoney(net) + ' บาท';
     } else {
-      remaining.value = '';
+      netEl.value = '';
     }
   }
 
@@ -840,11 +847,16 @@
 
     // Payment
     const totalAmount = parseFloat(document.getElementById('totalAmount').value);
+    const voucherAmount = parseFloat(document.getElementById('voucherAmount').value);
     const depositAmount = parseFloat(document.getElementById('depositAmount').value);
-    const payment = (isSale && (!isNaN(totalAmount) || !isNaN(depositAmount))) ? {
-      totalAmount: isNaN(totalAmount) ? null : totalAmount,
-      depositAmount: isNaN(depositAmount) ? null : depositAmount,
-      remainingAmount: (!isNaN(totalAmount) && !isNaN(depositAmount)) ? +(totalAmount - depositAmount).toFixed(2) : null
+    const hasAnyPayment = !isNaN(totalAmount) || !isNaN(voucherAmount) || !isNaN(depositAmount);
+    const payment = (isSale && hasAnyPayment) ? {
+      totalAmount:   isNaN(totalAmount) ? null : totalAmount,
+      voucherAmount: isNaN(voucherAmount) ? null : voucherAmount,
+      netAmount:     !isNaN(totalAmount)
+                       ? +(totalAmount - (isNaN(voucherAmount) ? 0 : voucherAmount)).toFixed(2)
+                       : null,
+      depositAmount: isNaN(depositAmount) ? null : depositAmount
     } : null;
 
     // Products summary text
@@ -996,7 +1008,7 @@
 
     // Payment
     document.getElementById('totalAmount').addEventListener('input', recalcPayment);
-    document.getElementById('depositAmount').addEventListener('input', recalcPayment);
+    document.getElementById('voucherAmount').addEventListener('input', recalcPayment);
 
     // Add product
     document.getElementById('addProductBtn').addEventListener('click', addProductSlot);
