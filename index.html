@@ -241,7 +241,7 @@
     }
     .product-row {
       display: grid;
-      grid-template-columns: 1fr 80px;
+      grid-template-columns: 1fr 1fr 90px;
       gap: 8px;
       align-items: end;
     }
@@ -251,6 +251,20 @@
       color: var(--gray-500);
       margin-top: 4px;
     }
+    .product-line-total {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+      padding: 6px 10px;
+      background: var(--brand-light, #ecfdf5);
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--brand-secondary, #065F46);
+      font-weight: 600;
+    }
+    .product-line-total .amt { font-size: 13px; }
     .add-product-btn {
       width: 100%;
       padding: 10px;
@@ -519,7 +533,7 @@
       </div>
       <div class="payment-grid">
         <div class="field">
-          <label>ค่าสินค้าชำระในงาน (บาท)</label>
+          <label>ค่าสินค้าชำระในงาน (บาท) <span class="hint">(รวมจากราคา/เส้น • แก้เองได้)</span></label>
           <input type="number" id="totalAmount" placeholder="เช่น 15000" min="0" step="0.01" inputmode="decimal" />
         </div>
         <div class="field">
@@ -685,22 +699,34 @@
           <input type="number" class="product-qty" min="1" step="1" placeholder="0" inputmode="numeric" ${index === 0 ? 'required' : ''} />
         </div>
         <div class="field" style="margin:0;">
+          <label>ราคา/เส้น (บาท) <span class="hint">(รวม VAT)</span></label>
+          <input type="number" class="product-price" min="0" step="0.01" placeholder="เช่น 521" inputmode="decimal" />
+        </div>
+        <div class="field" style="margin:0;">
           <label>น้ำหนัก (กก.)</label>
           <input type="text" class="product-wgt" placeholder="—" readonly />
         </div>
         <div class="product-meta"></div>
+        <div class="product-line-total" style="display:none;">
+          <span>รวมเงินรายการนี้</span>
+          <span class="amt">—</span>
+        </div>
       </div>
     `;
 
     const skuSel = slot.querySelector('.product-sku');
     const qtyInput = slot.querySelector('.product-qty');
+    const priceInput = slot.querySelector('.product-price');
     const wgtInput = slot.querySelector('.product-wgt');
     const meta = slot.querySelector('.product-meta');
+    const lineTotalBox = slot.querySelector('.product-line-total');
+    const lineTotalAmt = lineTotalBox.querySelector('.amt');
     const removeBtn = slot.querySelector('.product-slot-remove');
 
     function recalc() {
       const sku = skuSel.value;
       const qty = parseFloat(qtyInput.value) || 0;
+      const price = parseFloat(priceInput.value) || 0;
       const prod = PRODUCTS.find(p => p.sku === sku);
       if (prod && qty > 0) {
         const total = (prod.wgtPerPc * qty).toFixed(2);
@@ -710,10 +736,21 @@
         wgtInput.value = '';
         meta.textContent = '';
       }
+      // line amount = qty × price
+      if (qty > 0 && price > 0) {
+        const lineAmt = qty * price;
+        lineTotalBox.style.display = 'flex';
+        lineTotalAmt.textContent = formatMoney(lineAmt) + ' บาท';
+      } else {
+        lineTotalBox.style.display = 'none';
+        lineTotalAmt.textContent = '—';
+      }
+      recalcGoodsTotal();
     }
 
     skuSel.addEventListener('change', recalc);
     qtyInput.addEventListener('input', recalc);
+    priceInput.addEventListener('input', recalc);
 
     if (removeBtn) {
       removeBtn.addEventListener('click', () => {
@@ -748,6 +785,38 @@
     if (count >= MAX_PRODUCTS) return;
     container.appendChild(createProductSlot(count));
     updateAddBtn();
+  }
+
+  // ============================================================
+  // รวมราคาสินค้าทุก slot → เติมช่อง "ค่าสินค้าชำระในงาน"
+  // เขียนทับให้อัตโนมัติ เว้นแต่ sales พิมพ์แก้ช่องเอง (manual override)
+  // ============================================================
+  function recalcGoodsTotal() {
+    const totalEl = document.getElementById('totalAmount');
+    if (!totalEl) return;
+    // ถ้า sales แก้ช่องเอง → ไม่เขียนทับ
+    if (totalEl.dataset.manual === '1') return;
+
+    let sum = 0;
+    let hasPrice = false;
+    document.querySelectorAll('.product-slot').forEach(slot => {
+      const qty = parseFloat(slot.querySelector('.product-qty').value) || 0;
+      const price = parseFloat(slot.querySelector('.product-price').value) || 0;
+      if (qty > 0 && price > 0) {
+        sum += qty * price;
+        hasPrice = true;
+      }
+    });
+
+    if (hasPrice) {
+      totalEl.value = +sum.toFixed(2);
+      totalEl.dataset.auto = '1';
+      recalcPayment();
+    } else if (totalEl.dataset.auto === '1') {
+      // เคยเติมอัตโนมัติไว้ แต่ตอนนี้ไม่มีราคาแล้ว → ล้าง
+      totalEl.value = '';
+      recalcPayment();
+    }
   }
 
   // ============================================================
@@ -818,6 +887,8 @@
       if (!sku || qty <= 0) return;
       const p = PRODUCTS.find(x => x.sku === sku);
       if (!p) return;
+      const price = parseFloat(slot.querySelector('.product-price').value);
+      const pricePerPc = isNaN(price) ? null : price;
       products.push({
         sku: p.sku,
         model: p.model,
@@ -828,7 +899,9 @@
         endLabel: p.endLabel,
         qty: qty,
         wgtPerPc: p.wgtPerPc,
-        wgtTotal: +(p.wgtPerPc * qty).toFixed(2)
+        wgtTotal: +(p.wgtPerPc * qty).toFixed(2),
+        pricePerPc: pricePerPc,
+        lineAmount: pricePerPc !== null ? +(pricePerPc * qty).toFixed(2) : null
       });
     });
 
@@ -1007,7 +1080,20 @@
     document.getElementById('custType').addEventListener('change', applyCustTypeOther);
 
     // Payment
-    document.getElementById('totalAmount').addEventListener('input', recalcPayment);
+    const totalAmountEl = document.getElementById('totalAmount');
+    totalAmountEl.addEventListener('input', recalcPayment);
+    // detect การพิมพ์แก้เองด้วยมือ (keystroke จริง) → หยุดเขียนทับอัตโนมัติ
+    totalAmountEl.addEventListener('keydown', () => {
+      totalAmountEl.dataset.manual = '1';
+      totalAmountEl.dataset.auto = '';
+    });
+    // ถ้าลบจนว่าง → กลับมาให้คำนวณอัตโนมัติได้อีก
+    totalAmountEl.addEventListener('input', () => {
+      if (totalAmountEl.value === '') {
+        totalAmountEl.dataset.manual = '';
+        recalcGoodsTotal();
+      }
+    });
     document.getElementById('voucherAmount').addEventListener('input', recalcPayment);
 
     // Add product
