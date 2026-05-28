@@ -124,6 +124,10 @@
       background: white;
       transition: border-color 0.15s, box-shadow 0.15s;
     }
+    .field input.input-error {
+      border-color: var(--red) !important;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+    }
     .field input:focus,
     .field textarea:focus,
     .field select:focus {
@@ -699,7 +703,7 @@
           <input type="number" class="product-qty" min="1" step="1" placeholder="0" inputmode="numeric" ${index === 0 ? 'required' : ''} />
         </div>
         <div class="field" style="margin:0;">
-          <label>ราคา/เส้น (บาท) <span class="hint">(รวม VAT)</span></label>
+          <label>ราคา/เส้น (บาท) <span style="color:var(--red);">*</span> <span class="hint">(รวม VAT)</span></label>
           <input type="number" class="product-price" min="0" step="0.01" placeholder="เช่น 521" inputmode="decimal" />
         </div>
         <div class="field" style="margin:0;">
@@ -997,6 +1001,29 @@
     if (!firstSku || !firstQty || parseFloat(firstQty) <= 0) {
       showToast('กรุณาเลือกสินค้า และกรอกจำนวน');
       return;
+    }
+
+    // Validation: ราคา/เส้น บังคับกรอกทุกรุ่น (เฉพาะโหมดขาย) — เพื่อให้ใบรับเงิน gen ราคาได้ครบ
+    if (currentMode === 'sale') {
+      let priceError = false;
+      document.querySelectorAll('.product-slot').forEach(slot => {
+        const sku = slot.querySelector('.product-sku').value;
+        const qty = parseFloat(slot.querySelector('.product-qty').value) || 0;
+        if (!sku || qty <= 0) return; // slot ว่าง ข้าม
+        const priceEl = slot.querySelector('.product-price');
+        const price = parseFloat(priceEl.value);
+        if (isNaN(price) || price <= 0) {
+          priceError = true;
+          priceEl.classList.add('input-error');
+          priceEl.focus();
+        } else {
+          priceEl.classList.remove('input-error');
+        }
+      });
+      if (priceError) {
+        showToast('กรุณากรอกราคา/เส้น (รวม VAT) ให้ครบทุกรุ่น');
+        return;
+      }
     }
 
     const ref = URL_REF || genRef();
