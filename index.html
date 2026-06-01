@@ -215,6 +215,52 @@
       cursor: pointer;
     }
 
+    /* Tax invoice radio */
+    .tax-radio-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .tax-radio {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px;
+      background: white;
+      border: 2px solid var(--gray-200);
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-700);
+      transition: all 0.15s;
+    }
+    .tax-radio input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--brand-primary);
+      margin: 0;
+      cursor: pointer;
+    }
+    .tax-radio.selected {
+      background: var(--brand-light);
+      border-color: var(--brand-primary);
+      color: var(--brand-primary);
+    }
+    .tax-radio-group.input-error .tax-radio {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.10);
+    }
+    .field input.input-warn {
+      border-color: #d97706 !important;
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.12) !important;
+    }
+    .field .help.warn {
+      color: #d97706;
+      font-weight: 600;
+    }
+
     /* Products */
     .product-slot {
       background: var(--gray-50);
@@ -499,6 +545,31 @@
       <div class="field hidden" id="custTypeOtherField">
         <label>ระบุประเภทลูกค้า</label>
         <input type="text" id="custTypeOther" placeholder="ระบุ..." maxlength="100" />
+      </div>
+    </div>
+
+    <!-- Section: Tax Invoice (hidden in survey mode) -->
+    <div class="section" id="taxSection">
+      <div class="section-title">ใบกำกับภาษี</div>
+
+      <div class="field">
+        <label>ต้องการใบกำกับภาษีหรือไม่ <span class="req">*</span></label>
+        <div class="tax-radio-group" id="taxRadioGroup">
+          <label class="tax-radio">
+            <input type="radio" name="wantTax" value="yes" />
+            <span>🧾 ต้องการ</span>
+          </label>
+          <label class="tax-radio">
+            <input type="radio" name="wantTax" value="no" />
+            <span>ไม่ต้องการ</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="field hidden" id="taxIdField">
+        <label>เลขผู้เสียภาษี / บัตรประชาชน <span class="req">*</span> <span class="hint">(13 หลัก)</span></label>
+        <input type="text" id="taxId" placeholder="X-XXXX-XXXXX-XX-X" inputmode="numeric" maxlength="17" />
+        <div class="help" id="taxIdHelp">นิติบุคคล = เลขผู้เสียภาษี · บุคคลธรรมดา = เลขบัตรประชาชน 13 หลัก</div>
       </div>
     </div>
 
@@ -831,7 +902,7 @@
     document.querySelectorAll('.mode-card').forEach(c => {
       c.classList.toggle('selected', c.dataset.mode === mode);
     });
-    const hideInSurvey = ['emailField', 'addressSection', 'paymentSection'];
+    const hideInSurvey = ['emailField', 'taxSection', 'addressSection', 'paymentSection'];
     hideInSurvey.forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
@@ -880,6 +951,57 @@
   }
 
   // ============================================================
+  // TAX INVOICE (decision A: radio บังคับเลือก / B: 13 หลัก + check digit เตือน / C: ช่องเดียว)
+  // ============================================================
+  function applyTaxToggle() {
+    const sel = document.querySelector('input[name="wantTax"]:checked');
+    const val = sel ? sel.value : '';
+    document.querySelectorAll('.tax-radio').forEach(c => {
+      c.classList.toggle('selected', c.querySelector('input').checked);
+    });
+    document.getElementById('taxIdField').classList.toggle('hidden', val !== 'yes');
+    document.getElementById('taxRadioGroup').classList.remove('input-error');
+  }
+
+  function formatTaxId(raw) {
+    const d = String(raw).replace(/\D/g, '').slice(0, 13);
+    const parts = [];
+    if (d.length > 0)  parts.push(d.slice(0, 1));
+    if (d.length > 1)  parts.push(d.slice(1, 5));
+    if (d.length > 5)  parts.push(d.slice(5, 10));
+    if (d.length > 10) parts.push(d.slice(10, 12));
+    if (d.length > 12) parts.push(d.slice(12, 13));
+    return parts.join('-');
+  }
+
+  // check digit ตามอัลกอริทึมเลข 13 หลัก (สรรพากร/บัตร ปชช.)
+  function isValidThaiId(id) {
+    if (!/^\d{13}$/.test(id)) return false;
+    let sum = 0;
+    for (let i = 0; i < 12; i++) sum += parseInt(id[i], 10) * (13 - i);
+    const check = (11 - (sum % 11)) % 10;
+    return check === parseInt(id[12], 10);
+  }
+
+  function onTaxIdInput() {
+    const el = document.getElementById('taxId');
+    const help = document.getElementById('taxIdHelp');
+    const digits = el.value.replace(/\D/g, '').slice(0, 13);
+    el.value = formatTaxId(digits);
+    el.classList.remove('input-error');
+    // check digit = "เตือน" ไม่บล็อก (decision B)
+    if (digits.length === 13 && !isValidThaiId(digits)) {
+      el.classList.add('input-warn');
+      help.classList.add('warn');
+      help.textContent = '⚠️ เลขนี้อาจพิมพ์ผิด (check digit ไม่ผ่าน) — ตรวจสอบอีกครั้ง หรือกดบันทึกต่อได้';
+    } else {
+      el.classList.remove('input-warn');
+      help.classList.remove('warn');
+      help.textContent = 'นิติบุคคล = เลขผู้เสียภาษี · บุคคลธรรมดา = เลขบัตรประชาชน 13 หลัก';
+    }
+  }
+
+  // ============================================================
   // BUILD PAYLOAD
   // ============================================================
   function buildPayload(ref) {
@@ -921,6 +1043,11 @@
     const sameAddr = document.getElementById('sameAddr').checked;
     const shippingRaw = document.getElementById('shippingAddr').value.trim();
     const shipping = sameAddr ? billing : shippingRaw;
+
+    // Tax invoice (decision A/B/C) — เก็บเฉพาะโหมดขาย
+    const wantTaxSel = document.querySelector('input[name="wantTax"]:checked');
+    const wantTaxInvoice = isSale && wantTaxSel ? wantTaxSel.value === 'yes' : false;
+    const taxIdDigits = document.getElementById('taxId').value.replace(/\D/g, '');
 
     // Payment
     const totalAmount = parseFloat(document.getElementById('totalAmount').value);
@@ -969,7 +1096,9 @@
         email: isSale ? document.getElementById('email').value.trim() : '',
         type: custTypeVal,
         typeLabel: custTypeLabel,
-        typeOther: custTypeVal === 'other' ? custTypeOther : ''
+        typeOther: custTypeVal === 'other' ? custTypeOther : '',
+        wantTaxInvoice: wantTaxInvoice,
+        taxId: wantTaxInvoice ? taxIdDigits : ''
       },
       addresses: isSale ? {
         billing: billing,
@@ -1023,6 +1152,28 @@
       if (priceError) {
         showToast('กรุณากรอกราคา/เส้น (รวม VAT) ให้ครบทุกรุ่น');
         return;
+      }
+    }
+
+    // Validation: ใบกำกับภาษี (เฉพาะโหมดขาย) — A: บังคับเลือก, B: ต้องครบ 13 หลัก (check digit แค่เตือน)
+    if (currentMode === 'sale') {
+      const taxSel = document.querySelector('input[name="wantTax"]:checked');
+      if (!taxSel) {
+        document.getElementById('taxRadioGroup').classList.add('input-error');
+        document.getElementById('taxSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        showToast('กรุณาเลือกว่าต้องการใบกำกับภาษีหรือไม่');
+        return;
+      }
+      if (taxSel.value === 'yes') {
+        const taxIdEl = document.getElementById('taxId');
+        const digits = taxIdEl.value.replace(/\D/g, '');
+        if (digits.length !== 13) {
+          taxIdEl.classList.add('input-error');
+          taxIdEl.focus();
+          showToast('กรุณากรอกเลขผู้เสียภาษี / บัตรประชาชน ให้ครบ 13 หลัก');
+          return;
+        }
+        taxIdEl.classList.remove('input-error');
       }
     }
 
@@ -1106,6 +1257,12 @@
     // Customer type
     document.getElementById('custType').addEventListener('change', applyCustTypeOther);
 
+    // Tax invoice
+    document.querySelectorAll('input[name="wantTax"]').forEach(r => {
+      r.addEventListener('change', applyTaxToggle);
+    });
+    document.getElementById('taxId').addEventListener('input', onTaxIdInput);
+
     // Payment
     const totalAmountEl = document.getElementById('totalAmount');
     totalAmountEl.addEventListener('input', recalcPayment);
@@ -1138,6 +1295,7 @@
     updateAddBtn();
     applyMode('sale');
     applySameAddr();
+    applyTaxToggle();
     bindEvents();
     initLiff();
   });
