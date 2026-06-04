@@ -467,6 +467,11 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       max-width: 90%;
     }
+      /* === Phase 2: lookup badge === */
+    .lookup-badge { margin-top: 6px; padding: 7px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; line-height: 1.35; }
+    .lookup-badge.searching { background: var(--gray-100); color: var(--gray-500); }
+    .lookup-badge.returning { background: var(--brand-light); color: var(--brand-primary); border: 1px solid var(--brand-accent); }
+    .lookup-badge.new { background: var(--amber-50); color: var(--amber-700); border: 1px solid var(--amber-200); }
   </style>
 </head>
 <body>
@@ -524,6 +529,7 @@
       <div class="field">
         <label>เบอร์โทร <span class="req">*</span></label>
         <input type="tel" id="phone" placeholder="08X-XXX-XXXX" inputmode="numeric" maxlength="15" required />
+        <div class="lookup-badge hidden" id="lookupBadge"></div>
       </div>
 
       <div class="field" id="emailField">
@@ -545,6 +551,13 @@
       <div class="field hidden" id="custTypeOtherField">
         <label>ระบุประเภทลูกค้า</label>
         <input type="text" id="custTypeOther" placeholder="ระบุ..." maxlength="100" />
+      </div>
+
+      <div class="field">
+        <label>จังหวัด <span class="hint">(แนะนำให้กรอก)</span></label>
+        <select id="province">
+          <option value="">-- เลือกจังหวัด --</option>
+        </select>
       </div>
     </div>
 
@@ -673,6 +686,7 @@
   // === CONFIG ===
   const LIFF_ID = '2010023092-EqIxfEch';
   const N8N_URL = 'https://primary-production-4fbc.up.railway.app/webhook/ziga-liff-submit';
+  const LOOKUP_URL = 'https://primary-production-4fbc.up.railway.app/webhook/ziga-customer-lookup';
   const MAX_PRODUCTS = 5;
 
   // === PRODUCT MASTER (14 SKUs) ===
@@ -1002,6 +1016,97 @@
   }
 
   // ============================================================
+  // PHASE 2 — PROVINCE + CUSTOMER LOOKUP BY PHONE
+  // ============================================================
+  const PROVINCES = ["กรุงเทพมหานคร","กระบี่","กาญจนบุรี","กาฬสินธุ์","กำแพงเพชร","ขอนแก่น","จันทบุรี","ฉะเชิงเทรา","ชลบุรี","ชัยนาท","ชัยภูมิ","ชุมพร","เชียงราย","เชียงใหม่","ตรัง","ตราด","ตาก","นครนายก","นครปฐม","นครพนม","นครราชสีมา","นครศรีธรรมราช","นครสวรรค์","นนทบุรี","นราธิวาส","น่าน","บึงกาฬ","บุรีรัมย์","ปทุมธานี","ประจวบคีรีขันธ์","ปราจีนบุรี","ปัตตานี","พระนครศรีอยุธยา","พะเยา","พังงา","พัทลุง","พิจิตร","พิษณุโลก","เพชรบุรี","เพชรบูรณ์","แพร่","ภูเก็ต","มหาสารคาม","มุกดาหาร","แม่ฮ่องสอน","ยโสธร","ยะลา","ร้อยเอ็ด","ระนอง","ระยอง","ราชบุรี","ลพบุรี","ลำปาง","ลำพูน","เลย","ศรีสะเกษ","สกลนคร","สงขลา","สตูล","สมุทรปราการ","สมุทรสงคราม","สมุทรสาคร","สระแก้ว","สระบุรี","สิงห์บุรี","สุโขทัย","สุพรรณบุรี","สุราษฎร์ธานี","สุรินทร์","หนองคาย","หนองบัวลำภู","อ่างทอง","อำนาจเจริญ","อุดรธานี","อุตรดิตถ์","อุทัยธานี","อุบลราชธานี"];
+
+  function populateProvinces() {
+    const sel = document.getElementById('province');
+    if (!sel) return;
+    PROVINCES.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p; o.textContent = p; sel.appendChild(o);
+    });
+  }
+
+  // normalize: เก็บเฉพาะตัวเลข + แปลง +66/66 นำหน้าเป็น 0 (PK ต้องตรงกับ AX)
+  function normalizePhone(raw) {
+    let d = String(raw || '').replace(/\D/g, '');
+    if (d.startsWith('66') && d.length >= 11) d = '0' + d.slice(2);
+    return d;
+  }
+
+  function setLookupBadge(state, text) {
+    const b = document.getElementById('lookupBadge');
+    if (!b) return;
+    b.className = 'lookup-badge ' + (state || '');
+    b.textContent = text || '';
+    b.classList.toggle('hidden', !text);
+  }
+
+  function fillFromCustomer(c, h) {
+    const set = (id, v) => { const el = document.getElementById(id); if (el && v != null && v !== '') el.value = v; };
+    set('custName', c.name);
+    set('contactPerson', c.contactPerson || c.contact_person);
+    set('email', c.email);
+    if (c.province) { const pe = document.getElementById('province'); if (pe) pe.value = c.province; }
+    if (c.type_code) { document.getElementById('custType').value = c.type_code; applyCustTypeOther(); }
+    if (c.tax_id) {
+      const yes = document.querySelector('input[name="wantTax"][value="yes"]');
+      if (yes) { yes.checked = true; applyTaxToggle(); }
+      const t = document.getElementById('taxId'); if (t) t.value = formatTaxId(c.tax_id);
+    }
+    set('billingAddr', c.billing_address);
+    const same = (c.same_address === true || c.same_address === 'TRUE' || c.same_address === 'true');
+    const sameEl = document.getElementById('sameAddr');
+    sameEl.checked = same; applySameAddr();
+    if (!same) set('shippingAddr', c.shipping_address);
+    let txt = '\uD83D\uDFE2 ลูกค้าเก่า';
+    if (h && h.total_orders != null) txt += ' \u00b7 ซื้อ ' + h.total_orders + ' ครั้ง';
+    if (h && h.last_order_date) txt += ' \u00b7 ล่าสุด ' + h.last_order_date;
+    setLookupBadge('returning', txt);
+    window.__isReturning = true;
+  }
+
+  let _lookupTimer = null, _lastLookup = '';
+  function onPhoneInput() {
+    const phone = normalizePhone(document.getElementById('phone').value);
+    window.__isReturning = false;
+    if (_lookupTimer) clearTimeout(_lookupTimer);
+    if (phone.length < 9) { setLookupBadge('', ''); _lastLookup=''; return; }
+    _lookupTimer = setTimeout(() => doLookup(phone), 450);
+  }
+
+  async function doLookup(phone) {
+    if (phone === _lastLookup) return;
+    _lastLookup = phone;
+    setLookupBadge('searching', '\uD83D\uDD0D กำลังค้นหา...');
+    try {
+      const ctrl = new AbortController();
+      const to = setTimeout(() => ctrl.abort(), 4000);
+      const res = await fetch(LOOKUP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: phone }),
+        signal: ctrl.signal
+      });
+      clearTimeout(to);
+      const data = await res.json();
+      if (data && data.found && data.customer) {
+        fillFromCustomer(data.customer, data.history);
+      } else {
+        setLookupBadge('new', '\uD83C\uDD95 ลูกค้าใหม่ \u2014 กรอกครั้งเดียว ระบบจะจำไว้');
+        window.__isReturning = false;
+      }
+    } catch (err) {
+      // endpoint ยังไม่พร้อม/เน็ตหลุด \u2192 ถือเป็นลูกค้าใหม่ ไม่บล็อกการกรอก
+      console.warn('lookup failed:', err);
+      setLookupBadge('new', '\uD83C\uDD95 ลูกค้าใหม่');
+      window.__isReturning = false;
+    }
+  }
+
+  // ============================================================
   // BUILD PAYLOAD
   // ============================================================
   function buildPayload(ref) {
@@ -1098,7 +1203,10 @@
         typeLabel: custTypeLabel,
         typeOther: custTypeVal === 'other' ? custTypeOther : '',
         wantTaxInvoice: wantTaxInvoice,
-        taxId: wantTaxInvoice ? taxIdDigits : ''
+        taxId: wantTaxInvoice ? taxIdDigits : '',
+        province: document.getElementById('province') ? document.getElementById('province').value : '',
+        customerCode: 'AZ' + normalizePhone(document.getElementById('phone').value),
+        isReturning: !!window.__isReturning
       },
       addresses: isSale ? {
         billing: billing,
@@ -1257,6 +1365,9 @@
     // Customer type
     document.getElementById('custType').addEventListener('change', applyCustTypeOther);
 
+    // Phone lookup (Phase 2)
+    document.getElementById('phone').addEventListener('input', onPhoneInput);
+
     // Tax invoice
     document.querySelectorAll('input[name="wantTax"]').forEach(r => {
       r.addEventListener('change', applyTaxToggle);
@@ -1292,6 +1403,7 @@
   // ============================================================
   document.addEventListener('DOMContentLoaded', () => {
     addProductSlot(); // first slot
+    populateProvinces();
     updateAddBtn();
     applyMode('sale');
     applySameAddr();
