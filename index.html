@@ -1083,7 +1083,7 @@
     setLookupBadge('searching', '\uD83D\uDD0D กำลังค้นหา...');
     try {
       const ctrl = new AbortController();
-      const to = setTimeout(() => ctrl.abort(), 4000);
+      const to = setTimeout(() => ctrl.abort(), 15000);
       const res = await fetch(LOOKUP_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
