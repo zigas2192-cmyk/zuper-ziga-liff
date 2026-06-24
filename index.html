@@ -608,7 +608,7 @@
 
     <!-- Section: Products -->
     <div class="section">
-      <div class="section-title">รายการสินค้า (สูงสุด 3 รุ่น) *</div>
+      <div class="section-title">รายการสินค้า (สูงสุด 5 รุ่น) *</div>
       <div id="productsContainer"></div>
       <button type="button" id="addProductBtn" class="add-product-btn">+ เพิ่มสินค้า</button>
     </div>
@@ -689,26 +689,28 @@
   const LOOKUP_URL = 'https://primary-production-4fbc.up.railway.app/webhook/ziga-customer-lookup';
   const MAX_PRODUCTS = 5;
 
-  // === PRODUCT MASTER (14 SKUs) ===
-  // 1" — 10 SKUs (screen value used in SKU code)
-  // 1-1/4" — 4 SKUs (actual value used in SKU code per user spec)
+  // === PRODUCT MASTER (10 SKUs · sku = AX ItemNumber จริง) ===
+  // ที่มา: รายการzuper_ziga_ในapp.xlsx (sheet 4_Products) — เฉพาะท่อ Zuper ZIGA น้ำเงินเรียบ
+  // sku = AX ItemNumber → products_json พก AX code ตรง ใช้ import AX ได้ทันที
   const PRODUCTS = [
-    // ZIGA 1" — 10 SKUs (display: thk=actual, screen in parens)
-    { sku: 'ZUPER1-200-TH', model: '1"',     thk: '1.9',     actual: '1.9', screen: '2.0', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 8.70  },
-    { sku: 'ZUPER1-200-PL', model: '1"',     thk: '1.9',     actual: '1.9', screen: '2.0', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 8.70  },
-    { sku: 'ZUPER1-250-TH', model: '1"',     thk: '2.3',     actual: '2.3', screen: '2.5', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 10.75 },
-    { sku: 'ZUPER1-250-PL', model: '1"',     thk: '2.3',     actual: '2.3', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 10.75 },
-    { sku: 'ZUPER1-280-TH', model: '1"',     thk: '2.5 เต็ม', actual: '2.5', screen: '2.5', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 11.80 },
-    { sku: 'ZUPER1-280-PL', model: '1"',     thk: '2.5 เต็ม', actual: '2.5', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 11.80 },
-    { sku: 'ZUPER1-300-TH', model: '1"',     thk: '2.8',     actual: '2.8', screen: '3.0', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 12.50 },
-    { sku: 'ZUPER1-300-PL', model: '1"',     thk: '2.8',     actual: '2.8', screen: '3.0', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 12.50 },
-    { sku: 'ZUPER1-320-TH', model: '1"',     thk: '3.2',     actual: '3.2', screen: '3.2', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 14.30 },
-    { sku: 'ZUPER1-320-PL', model: '1"',     thk: '3.2',     actual: '3.2', screen: '3.2', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 14.30 },
-    // ZIGA 1-1/4" — NEW (สกรีน 2.5 / actual 2.3)
-    { sku: 'ZUPER125-230-TH', model: '1-1/4"', thk: '2.3', actual: '2.3', screen: '2.5', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 13.5 },
-    { sku: 'ZUPER125-230-PL', model: '1-1/4"', thk: '2.3', actual: '2.3', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 13.5 },
-    { sku: 'ZUPER125-280-TH', model: '1-1/4"', thk: '2.8', actual: '2.8', screen: '3.2', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 16.5 },
-    { sku: 'ZUPER125-280-PL', model: '1-1/4"', thk: '2.8', actual: '2.8', screen: '3.2', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 16.5 },
+    // 1/2"
+    { sku: 'FZOSAZSM040190R', model: '1/2"',   thk: '1.9',     actual: '1.9', screen: '2.0', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 5.40  },
+    // 3/4"
+    { sku: 'FZOSAZSM060190R', model: '3/4"',   thk: '1.9',     actual: '1.9', screen: '2.0', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 7.00  },
+    { sku: 'FZOSAZSM060230R', model: '3/4"',   thk: '2.3',     actual: '2.3', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 8.50  },
+    { sku: 'FZOSAZSM060250R', model: '3/4"',   thk: '2.5',     actual: '2.5', screen: '2.8', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 9.25  },
+    // 1"
+    { sku: 'FZOSAZSM100190R', model: '1"',     thk: '1.9',     actual: '1.9', screen: '2.0', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 8.70  },
+    { sku: 'FZOSAZSM100230R', model: '1"',     thk: '2.3',     actual: '2.3', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 10.75 },
+    { sku: 'FZOSAZSM100250R', model: '1"',     thk: '2.5 เต็ม', actual: '2.5', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 11.80 },
+    { sku: 'FZOSAZSM100280R', model: '1"',     thk: '2.8',     actual: '2.8', screen: '3.0', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 12.50 },
+    { sku: 'FZOSAZSM100320R', model: '1"',     thk: '3.2',     actual: '3.2', screen: '3.2', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 14.30 },
+    // 1-1/4"
+    { sku: 'FZOSAZSM120230R', model: '1-1/4"', thk: '2.3',     actual: '2.3', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 13.50 },
+    // === อุปกรณ์ (สี/ลวดเชื่อม) — cat:'acc' · หน่วยไม่ใช่เส้น · ไม่มีน้ำหนัก/หน่วย ===
+    { sku: 'FENZAROD0260350', cat: 'acc', name: 'ลวดเชื่อมเหล็ก ซิก้า 2.6 มม. × 350 มม. (กล่องละ 2 กก.)',  unit: 'กล่อง',   wgtPerPc: null },
+    { sku: 'FENZAROD0320350', cat: 'acc', name: 'ลวดเชื่อมเหล็ก ซิก้า 3.2 มม. × 350 มม. (กล่องละ 5 กก.)',  unit: 'กระป๋อง', wgtPerPc: null },
+    { sku: 'FENZABRZ0103500', cat: 'acc', name: 'สีทาเหล็กสังกะสี Ziga-Silver 3.5 ลิตร',                    unit: 'กระป๋อง', wgtPerPc: null },
   ];
 
   // === STATE ===
@@ -752,13 +754,15 @@
   // ============================================================
   function buildProductOptions() {
     const grouped = {};
+    const accs = [];
     PRODUCTS.forEach(p => {
+      if (p.cat === 'acc') { accs.push(p); return; }
       if (!grouped[p.model]) grouped[p.model] = [];
       grouped[p.model].push(p);
     });
     let html = '<option value="">-- เลือกสินค้า --</option>';
     Object.keys(grouped).forEach(model => {
-      const isNew = model === '1-1/4"';
+      const isNew = model !== '1"';
       html += `<optgroup label="Zuper ZIGA ${model}${isNew ? ' 🆕' : ''}">`;
       grouped[model].forEach(p => {
         const screenInfo = p.screen ? ` (สกรีน ${p.screen})` : '';
@@ -767,6 +771,13 @@
       });
       html += '</optgroup>';
     });
+    if (accs.length) {
+      html += '<optgroup label="🔧 อุปกรณ์ (สี/ลวดเชื่อม)">';
+      accs.forEach(p => {
+        html += `<option value="${p.sku}">${p.name}</option>`;
+      });
+      html += '</optgroup>';
+    }
     return html;
   }
 
@@ -784,11 +795,11 @@
       </div>
       <div class="product-row">
         <div class="field" style="margin:0;">
-          <label>จำนวน (เส้น)</label>
+          <label class="qty-label">จำนวน (เส้น)</label>
           <input type="number" class="product-qty" min="1" step="1" placeholder="0" inputmode="numeric" ${index === 0 ? 'required' : ''} />
         </div>
         <div class="field" style="margin:0;">
-          <label>ราคา/เส้น (บาท) <span style="color:var(--red);">*</span> <span class="hint">(รวม VAT)</span></label>
+          <label>ราคา/<span class="unit-label">เส้น</span> (บาท) <span style="color:var(--red);">*</span> <span class="hint">(รวม VAT)</span></label>
           <input type="number" class="product-price" min="0" step="0.01" placeholder="เช่น 521" inputmode="decimal" />
         </div>
         <div class="field" style="margin:0;">
@@ -808,6 +819,8 @@
     const priceInput = slot.querySelector('.product-price');
     const wgtInput = slot.querySelector('.product-wgt');
     const meta = slot.querySelector('.product-meta');
+    const qtyLabel = slot.querySelector('.qty-label');
+    const unitLabel = slot.querySelector('.unit-label');
     const lineTotalBox = slot.querySelector('.product-line-total');
     const lineTotalAmt = lineTotalBox.querySelector('.amt');
     const removeBtn = slot.querySelector('.product-slot-remove');
@@ -817,7 +830,12 @@
       const qty = parseFloat(qtyInput.value) || 0;
       const price = parseFloat(priceInput.value) || 0;
       const prod = PRODUCTS.find(p => p.sku === sku);
-      if (prod && qty > 0) {
+      const unit = prod ? (prod.unit || 'เส้น') : 'เส้น';
+      // ปรับ label หน่วยตามสินค้า (ท่อ=เส้น · อุปกรณ์=กล่อง/กระป๋อง)
+      if (qtyLabel) qtyLabel.textContent = `จำนวน (${unit})`;
+      if (unitLabel) unitLabel.textContent = unit;
+      // น้ำหนัก: คำนวณเฉพาะท่อ (มี wgtPerPc) — อุปกรณ์ไม่มีน้ำหนัก/หน่วย
+      if (prod && prod.wgtPerPc && qty > 0) {
         const total = (prod.wgtPerPc * qty).toFixed(2);
         wgtInput.value = total + ' กก.';
         meta.textContent = `${prod.wgtPerPc} กก./เส้น × ${qty} เส้น = ${total} กก.`;
@@ -1120,17 +1138,21 @@
       if (!p) return;
       const price = parseFloat(slot.querySelector('.product-price').value);
       const pricePerPc = isNaN(price) ? null : price;
+      const isAcc = p.cat === 'acc';
       products.push({
         sku: p.sku,
-        model: p.model,
-        thk: p.thk,
-        actual: p.actual,
-        screen: p.screen || p.thk,
-        end: p.end,
-        endLabel: p.endLabel,
+        cat: p.cat || 'pipe',
+        name: isAcc ? p.name : `Zuper ZIGA ${p.model} หนา ${p.thk} ${p.endLabel}`,
+        unit: p.unit || 'เส้น',
+        model: p.model || '',
+        thk: p.thk || '',
+        actual: p.actual || '',
+        screen: p.screen || p.thk || '',
+        end: p.end || '',
+        endLabel: p.endLabel || '',
         qty: qty,
-        wgtPerPc: p.wgtPerPc,
-        wgtTotal: +(p.wgtPerPc * qty).toFixed(2),
+        wgtPerPc: p.wgtPerPc != null ? p.wgtPerPc : null,
+        wgtTotal: p.wgtPerPc != null ? +(p.wgtPerPc * qty).toFixed(2) : null,
         pricePerPc: pricePerPc,
         lineAmount: pricePerPc !== null ? +(pricePerPc * qty).toFixed(2) : null
       });
@@ -1169,8 +1191,12 @@
     } : null;
 
     // Products summary text
+    // Products summary text (ข้อความถึงลูกค้า) — ลูกค้าซื้อเป็น "รุ่นน้ำหนัก"
+    // เน้น 3 อย่าง: ขนาด · หนาวัดจริง (actual) · รุ่น กก./เส้น (wgtPerPc)
     const productsSummary = products.map((p, i) =>
-      `${i + 1}) Zuper ZIGA ${p.model} หนา ${p.thk} ${p.endLabel} — ${p.qty} เส้น (${p.wgtTotal} กก.)`
+      p.cat === 'acc'
+        ? `${i + 1}) ${p.name} — ${p.qty} ${p.unit}`
+        : `${i + 1}) Zuper ZIGA ขนาด ${p.model} · หนาวัดจริง ${p.actual} มม. · รุ่น ${p.wgtPerPc} กก./เส้น — ${p.qty} เส้น = ${p.wgtTotal} กก.`
     ).join('\n');
 
 // Giveaways (both modes, optional)
