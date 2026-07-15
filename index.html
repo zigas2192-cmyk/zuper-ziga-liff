@@ -517,8 +517,8 @@
       <div class="section-title">ข้อมูลลูกค้า</div>
 
       <div class="field">
-        <label>ชื่อลูกค้า / บริษัท <span class="req">*</span></label>
-        <input type="text" id="custName" placeholder="เช่น บริษัท เอบีซี จำกัด หรือ คุณวิชัย" maxlength="200" required />
+        <label>ชื่อลูกค้า / บริษัท</label>
+        <input type="text" id="custName" placeholder="เช่น บริษัท เอบีซี จำกัด หรือ คุณวิชัย" maxlength="200" />
       </div>
 
       <div class="field">
@@ -527,8 +527,8 @@
       </div>
 
       <div class="field">
-        <label>เบอร์โทร <span class="req">*</span></label>
-        <input type="tel" id="phone" placeholder="08X-XXX-XXXX" inputmode="numeric" maxlength="15" required />
+        <label>เบอร์โทร</label>
+        <input type="tel" id="phone" placeholder="08X-XXX-XXXX" inputmode="numeric" maxlength="15" />
         <div class="lookup-badge hidden" id="lookupBadge"></div>
       </div>
 
@@ -538,8 +538,8 @@
       </div>
 
       <div class="field">
-        <label>ประเภทลูกค้า <span class="req">*</span></label>
-        <select id="custType" required>
+        <label>ประเภทลูกค้า</label>
+        <select id="custType">
           <option value="">-- เลือก --</option>
           <option value="farm" data-label="ผู้เลี้ยงกุ้ง">ผู้เลี้ยงกุ้ง</option>
           <option value="dealer" data-label="ร้านค้า/ผู้แทนจำหน่าย">ร้านค้า / ผู้แทนจำหน่าย</option>
@@ -566,7 +566,7 @@
       <div class="section-title">ใบกำกับภาษี</div>
 
       <div class="field">
-        <label>ต้องการใบกำกับภาษีหรือไม่ <span class="req">*</span></label>
+        <label>ต้องการใบกำกับภาษีหรือไม่</label>
         <div class="tax-radio-group" id="taxRadioGroup">
           <label class="tax-radio">
             <input type="radio" name="wantTax" value="yes" />
@@ -580,7 +580,7 @@
       </div>
 
       <div class="field hidden" id="taxIdField">
-        <label>เลขผู้เสียภาษี / บัตรประชาชน <span class="req">*</span> <span class="hint">(13 หลัก)</span></label>
+        <label>เลขผู้เสียภาษี / บัตรประชาชน <span class="hint">(13 หลัก)</span></label>
         <input type="text" id="taxId" placeholder="X-XXXX-XXXXX-XX-X" inputmode="numeric" maxlength="17" />
         <div class="help" id="taxIdHelp">นิติบุคคล = เลขผู้เสียภาษี · บุคคลธรรมดา = เลขบัตรประชาชน 13 หลัก</div>
       </div>
@@ -591,7 +591,7 @@
       <div class="section-title">ที่อยู่</div>
 
       <div class="field">
-        <label>ที่อยู่ออกใบเสร็จ <span class="req">*</span></label>
+        <label>ที่อยู่ออกใบเสร็จ</label>
         <textarea id="billingAddr" placeholder="เลขที่ หมู่ ตำบล อำเภอ จังหวัด รหัสไปรษณีย์" maxlength="500"></textarea>
       </div>
 
@@ -608,7 +608,7 @@
 
     <!-- Section: Products -->
     <div class="section">
-      <div class="section-title">รายการสินค้า (สูงสุด 5 รุ่น) *</div>
+      <div class="section-title">รายการสินค้า (สูงสุด 5 รุ่น)</div>
       <div id="productsContainer"></div>
       <button type="button" id="addProductBtn" class="add-product-btn">+ เพิ่มสินค้า</button>
     </div>
@@ -787,19 +787,19 @@
     slot.dataset.index = index;
     slot.innerHTML = `
       <div class="product-slot-header">
-        <div class="product-slot-title">สินค้าที่ ${index + 1}${index === 0 ? ' *' : ''}</div>
+        <div class="product-slot-title">สินค้าที่ ${index + 1}</div>
         ${index > 0 ? '<button type="button" class="product-slot-remove">✕ ลบ</button>' : ''}
       </div>
       <div class="field">
-        <select class="product-sku" ${index === 0 ? 'required' : ''}>${buildProductOptions()}</select>
+        <select class="product-sku">${buildProductOptions()}</select>
       </div>
       <div class="product-row">
         <div class="field" style="margin:0;">
           <label class="qty-label">จำนวน (เส้น)</label>
-          <input type="number" class="product-qty" min="1" step="1" placeholder="0" inputmode="numeric" ${index === 0 ? 'required' : ''} />
+          <input type="number" class="product-qty" min="1" step="1" placeholder="0" inputmode="numeric" />
         </div>
         <div class="field" style="margin:0;">
-          <label>ราคา/<span class="unit-label">เส้น</span> (บาท) <span style="color:var(--red);">*</span> <span class="hint">(รวม VAT)</span></label>
+          <label>ราคา/<span class="unit-label">เส้น</span> (บาท) <span class="hint">(รวม VAT)</span></label>
           <input type="number" class="product-price" min="0" step="0.01" placeholder="เช่น 521" inputmode="decimal" />
         </div>
         <div class="field" style="margin:0;">
@@ -875,7 +875,7 @@
     slots.forEach((s, i) => {
       s.dataset.index = i;
       const title = s.querySelector('.product-slot-title');
-      if (title) title.textContent = `สินค้าที่ ${i + 1}${i === 0 ? ' *' : ''}`;
+      if (title) title.textContent = `สินค้าที่ ${i + 1}`;
     });
   }
 
@@ -942,7 +942,7 @@
     });
     // toggle required on billing address
     const billing = document.getElementById('billingAddr');
-    if (billing) billing.required = (mode === 'sale');
+    if (billing) billing.required = false;
   }
 
   // ============================================================
@@ -1254,62 +1254,10 @@
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
 
-    // Validation
-    if (document.querySelectorAll('.product-slot').length === 0) {
-      showToast('กรุณาเพิ่มสินค้าอย่างน้อย 1 รุ่น');
-      return;
-    }
-    const firstSku = document.querySelector('.product-slot .product-sku').value;
-    const firstQty = document.querySelector('.product-slot .product-qty').value;
-    if (!firstSku || !firstQty || parseFloat(firstQty) <= 0) {
-      showToast('กรุณาเลือกสินค้า และกรอกจำนวน');
-      return;
-    }
-
-    // Validation: ราคา/เส้น บังคับกรอกทุกรุ่น (เฉพาะโหมดขาย) — เพื่อให้ใบรับเงิน gen ราคาได้ครบ
-    if (currentMode === 'sale') {
-      let priceError = false;
-      document.querySelectorAll('.product-slot').forEach(slot => {
-        const sku = slot.querySelector('.product-sku').value;
-        const qty = parseFloat(slot.querySelector('.product-qty').value) || 0;
-        if (!sku || qty <= 0) return; // slot ว่าง ข้าม
-        const priceEl = slot.querySelector('.product-price');
-        const price = parseFloat(priceEl.value);
-        if (isNaN(price) || price <= 0) {
-          priceError = true;
-          priceEl.classList.add('input-error');
-          priceEl.focus();
-        } else {
-          priceEl.classList.remove('input-error');
-        }
-      });
-      if (priceError) {
-        showToast('กรุณากรอกราคา/เส้น (รวม VAT) ให้ครบทุกรุ่น');
-        return;
-      }
-    }
-
-    // Validation: ใบกำกับภาษี (เฉพาะโหมดขาย) — A: บังคับเลือก, B: ต้องครบ 13 หลัก (check digit แค่เตือน)
-    if (currentMode === 'sale') {
-      const taxSel = document.querySelector('input[name="wantTax"]:checked');
-      if (!taxSel) {
-        document.getElementById('taxRadioGroup').classList.add('input-error');
-        document.getElementById('taxSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        showToast('กรุณาเลือกว่าต้องการใบกำกับภาษีหรือไม่');
-        return;
-      }
-      if (taxSel.value === 'yes') {
-        const taxIdEl = document.getElementById('taxId');
-        const digits = taxIdEl.value.replace(/\D/g, '');
-        if (digits.length !== 13) {
-          taxIdEl.classList.add('input-error');
-          taxIdEl.focus();
-          showToast('กรุณากรอกเลขผู้เสียภาษี / บัตรประชาชน ให้ครบ 13 หลัก');
-          return;
-        }
-        taxIdEl.classList.remove('input-error');
-      }
-    }
+    // ปลดเงื่อนไขบังคับทั้งหมด — กรอกหรือไม่กรอกฟิลด์ใดก็บันทึกได้
+    document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+    const taxGrp = document.getElementById('taxRadioGroup');
+    if (taxGrp) taxGrp.classList.remove('input-error');
 
     const ref = URL_REF || genRef();
     const payload = buildPayload(ref);
