@@ -1202,11 +1202,11 @@
 
     // Products summary text
     // Products summary text (ข้อความถึงลูกค้า) — ลูกค้าซื้อเป็น "รุ่นน้ำหนัก"
-    // เน้น 3 อย่าง: ขนาด · หนาวัดจริง (actual) · รุ่น กก./เส้น (wgtPerPc)
+    // เน้น 4 อย่าง: ขนาด · ปลาย (เกลียว/เรียบ) · หนาวัดจริง · รุ่น กก./เส้น
     const productsSummary = products.map((p, i) =>
       p.cat === 'acc'
         ? `${i + 1}) ${p.name} — ${p.qty} ${p.unit}`
-        : `${i + 1}) Zuper ZIGA ขนาด ${p.model} · หนาวัดจริง ${p.actual} มม. · รุ่น ${p.wgtPerPc} กก./เส้น — ${p.qty} เส้น = ${p.wgtTotal} กก.`
+        : `${i + 1}) Zuper ZIGA ขนาด ${p.model} · ${p.endLabel} · หนาวัดจริง ${p.actual} มม. · รุ่น ${p.wgtPerPc} กก./เส้น — ${p.qty} เส้น = ${p.wgtTotal} กก.`
     ).join('\n');
 
 // Giveaways (both modes, optional)
