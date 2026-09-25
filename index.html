@@ -693,20 +693,30 @@
   // ที่มา: รายการzuper_ziga_ในapp.xlsx (sheet 4_Products) — เฉพาะท่อ Zuper ZIGA น้ำเงินเรียบ
   // sku = AX ItemNumber → products_json พก AX code ตรง ใช้ import AX ได้ทันที
   const PRODUCTS = [
-    // 1/2"
-    { sku: 'FZOSAZSM040190R', model: '1/2"',   thk: '1.9',     actual: '1.9', screen: '2.0', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 5.40  },
-    // 3/4"
-    { sku: 'FZOSAZSM060190R', model: '3/4"',   thk: '1.9',     actual: '1.9', screen: '2.0', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 7.00  },
-    { sku: 'FZOSAZSM060230R', model: '3/4"',   thk: '2.3',     actual: '2.3', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 8.50  },
-    { sku: 'FZOSAZSM060250R', model: '3/4"',   thk: '2.5',     actual: '2.5', screen: '2.8', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 9.25  },
-    // 1"
-    { sku: 'FZOSAZSM100190R', model: '1"',     thk: '1.9',     actual: '1.9', screen: '2.0', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 8.70  },
-    { sku: 'FZOSAZSM100230R', model: '1"',     thk: '2.3',     actual: '2.3', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 10.75 },
-    { sku: 'FZOSAZSM100250R', model: '1"',     thk: '2.5 เต็ม', actual: '2.5', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 11.80 },
-    { sku: 'FZOSAZSM100280R', model: '1"',     thk: '2.8',     actual: '2.8', screen: '3.0', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 12.50 },
-    { sku: 'FZOSAZSM100320R', model: '1"',     thk: '3.2',     actual: '3.2', screen: '3.2', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 14.30 },
-    // 1-1/4"
-    { sku: 'FZOSAZSM120230R', model: '1-1/4"', thk: '2.3',     actual: '2.3', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ', wgtPerPc: 13.50 },
+    // === 1/2" — 3 SKUs (OD 21.3 ± 0.5) — 169 เส้น/มัด ===
+    { sku: 'FZOSAZSM040190M', model: '1/2"',   thk: '1.9', actual: '1.9', screen: '2.0', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 5.40  },
+    { sku: 'FZOSAZSM040190R', model: '1/2"',   thk: '1.9', actual: '1.9', screen: '2.0', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 5.40  },
+    { sku: 'FZOSAZSM040230R', model: '1/2"',   thk: '2.3', actual: '2.3', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 6.50  },
+    // === 3/4" — 5 SKUs (OD 26.9 ± 0.5) — 127 เส้น/มัด ===
+    { sku: 'FZOSAZSM060190M', model: '3/4"',   thk: '1.9', actual: '1.9', screen: '2.0', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 7.00  },
+    { sku: 'FZOSAZSM060190R', model: '3/4"',   thk: '1.9', actual: '1.9', screen: '2.0', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 7.00  },
+    { sku: 'FZOSAZSM060230M', model: '3/4"',   thk: '2.3', actual: '2.3', screen: '2.5', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 8.50  },
+    { sku: 'FZOSAZSM060230R', model: '3/4"',   thk: '2.3', actual: '2.3', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 8.50  },
+    { sku: 'FZOSAZSM060250R', model: '3/4"',   thk: '2.5', actual: '2.5', screen: '2.8', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 9.25  },
+    // === 1" — 9 SKUs (OD 33.7 ± 0.5) — 91 เส้น/มัด ===
+    { sku: 'FZOSAZSM100190M', model: '1"',     thk: '1.9', actual: '1.9', screen: '2.0', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 8.70  },
+    { sku: 'FZOSAZSM100190R', model: '1"',     thk: '1.9', actual: '1.9', screen: '2.0', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 8.70  },
+    { sku: 'FZOSAZSM100230M', model: '1"',     thk: '2.3', actual: '2.3', screen: '2.5', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 10.75 },
+    { sku: 'FZOSAZSM100230R', model: '1"',     thk: '2.3', actual: '2.3', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 10.75 },
+    { sku: 'FZOSAZSM100250M', model: '1"',     thk: '2.5', actual: '2.5', screen: '2.8', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 11.80 },
+    { sku: 'FZOSAZSM100250R', model: '1"',     thk: '2.5', actual: '2.5', screen: '2.8', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 11.80 },
+    { sku: 'FZOSAZSM100280M', model: '1"',     thk: '2.8', actual: '2.8', screen: '3.0', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 12.50 },
+    { sku: 'FZOSAZSM100280R', model: '1"',     thk: '2.8', actual: '2.8', screen: '3.0', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 12.70 },
+    { sku: 'FZOSAZSM100320R', model: '1"',     thk: '3.2', actual: '3.2', screen: '3.2', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 14.30 },
+    // === 1-1/4" — 3 SKUs ===
+    { sku: 'FZOSAZSM120230M', model: '1-1/4"', thk: '2.3', actual: '2.3', screen: '2.5', end: 'TH', endLabel: 'ปลายเกลียว', wgtPerPc: 13.50 },
+    { sku: 'FZOSAZSM120230R', model: '1-1/4"', thk: '2.3', actual: '2.3', screen: '2.5', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 13.50 },
+    { sku: 'FZOSAZSM120280R', model: '1-1/4"', thk: '2.8', actual: '2.8', screen: '3.0', end: 'PL', endLabel: 'ปลายเรียบ',  wgtPerPc: 16.20 },
     // === อุปกรณ์ (สี/ลวดเชื่อม) — cat:'acc' · หน่วยไม่ใช่เส้น · ไม่มีน้ำหนัก/หน่วย ===
     { sku: 'FENZAROD0260350', cat: 'acc', name: 'ลวดเชื่อมเหล็ก ซิก้า 2.6 มม. × 350 มม. (กล่องละ 2 กก.)',  unit: 'กล่อง',   wgtPerPc: null },
     { sku: 'FENZAROD0320350', cat: 'acc', name: 'ลวดเชื่อมเหล็ก ซิก้า 3.2 มม. × 350 มม. (กล่องละ 5 กก.)',  unit: 'กระป๋อง', wgtPerPc: null },
